@@ -1,0 +1,100 @@
+.title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  margin: 4.5px 0 18px;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-container);
+  box-shadow: var(--shadow-container);
+  padding: 18px;
+}
+
+.cardHeader {
+  margin-bottom: 15px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.cardSubtitle {
+  margin: 3px 0 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 9px 12px;
+  background: var(--color-divider);
+  color: var(--color-text-table-header);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.table th:first-child {
+  border-radius: 7.5px 0 0 7.5px;
+}
+
+.table th:last-child {
+  border-radius: 0 7.5px 7.5px 0;
+}
+
+.table td {
+  padding: 10.5px 12px;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.deviceCell {
+  font-weight: 600;
+}
+
+.reasonCell {
+  color: var(--color-text-secondary);
+}
+
+.row:hover {
+  background: var(--color-divider);
+}
+
+.row:last-child td {
+  border-bottom: none;
+}
+
+.openButton {
+  padding: 6px 12px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-primary-navy);
+  background: var(--color-white);
+  color: var(--color-primary-navy);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .table {
+    display: block;
+    overflow-x: auto;
+  }
+}

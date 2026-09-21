@@ -1,0 +1,339 @@
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.headerTextBlock {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  margin: 4.5px 0 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.createButton {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 6px;
+  padding: 9px 16.5px;
+  border-radius: var(--radius-control);
+  border: none;
+  background: var(--color-primary-navy);
+  color: var(--color-white);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.createButton:hover {
+  background: var(--color-secondary-navy);
+}
+
+.createPlus {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.statCard {
+  position: relative;
+  background: var(--color-white);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 15px 16.5px 18px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.statCard::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--accent-color);
+}
+
+.statCardNeutral {
+  --accent-color: var(--color-kpi-neutral);
+}
+
+.statCardGreen {
+  --accent-color: var(--color-kpi-green);
+}
+
+.statCardBlue {
+  --accent-color: var(--color-kpi-blue);
+}
+
+.statCardPurple {
+  --accent-color: var(--color-kpi-purple);
+}
+
+.statLabel {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-table-header);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statValue {
+  font-size: 27px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 7.5px 0 4.5px;
+  line-height: 1.1;
+}
+
+.statCaption {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-container);
+  box-shadow: var(--shadow-container);
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.cardHeaderTextBlock {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.cardSubtitle {
+  margin: 3px 0 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.toolbarControls {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 9px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.toolbarControls > :nth-child(1) {
+  flex: 1 1 200px;
+  min-width: 160px;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 900px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px 12px;
+  background: var(--color-divider);
+  color: var(--color-text-table-header);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.table th:first-child {
+  border-radius: 7.5px 0 0 7.5px;
+}
+
+.table th:last-child {
+  border-radius: 0 7.5px 7.5px 0;
+}
+
+.table td {
+  padding: 12px 12px;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-divider);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row:hover {
+  background: var(--color-surface-subtle);
+}
+
+.row:last-child td {
+  border-bottom: none;
+}
+
+.deviceTypeCell {
+  font-weight: 700;
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28.5px;
+  height: 28.5px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-primary-navy);
+  cursor: pointer;
+}
+
+.iconButton svg {
+  width: 15px;
+  height: 15px;
+}
+
+.iconButton:hover {
+  background: var(--color-surface-subtle);
+  color: var(--color-secondary-navy);
+}
+
+.emptyState {
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: 24px 12px;
+  white-space: normal;
+}
+
+.flowGrid {
+  display: flex;
+  align-items: stretch;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.flowStep {
+  flex: 1 1 140px;
+  min-width: 120px;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-card);
+  padding: 10.5px 12px;
+}
+
+.flowStepLabel {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-table-header);
+  margin-bottom: 3px;
+}
+
+.flowStepValue {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flowArrow {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  align-self: center;
+  color: var(--color-text-secondary);
+}
+
+.ruleNote {
+  padding: 10.5px 12px;
+  border-radius: var(--radius-control);
+  background: var(--color-status-active-bg);
+  border-left: 3px solid var(--color-status-active);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .statGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flowArrow {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .headerRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .statGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbarControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbarControls > :nth-child(1) {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .flowStep {
+    flex: 1 1 100%;
+  }
+}

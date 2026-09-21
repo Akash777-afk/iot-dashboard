@@ -1,0 +1,118 @@
+.card {
+  position: relative;
+  background: var(--color-white);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 10.5px 13.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 97.5px;
+  min-width: 0;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover,
+.clickable:focus-visible {
+  box-shadow: var(--shadow-card), 0 0 12px var(--glow-bg);
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+  background: var(--accent-color);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 3px;
+}
+
+.label {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.iconWrap {
+  width: 24.5px;
+  height: 24.5px;
+  flex: 0 0 24.5px;
+  border-radius: 6px;
+  background: var(--accent-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 17px;
+  height: 17px;
+}
+
+.value {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+
+.action {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.neutral {
+  --accent-color: var(--color-kpi-neutral);
+  --accent-bg: rgba(98, 116, 142, 0.12);
+  --glow-bg: rgba(98, 116, 142, 0.15);
+}
+
+.green {
+  --accent-color: var(--color-kpi-green);
+  --accent-bg: rgba(50, 181, 122, 0.12);
+  --glow-bg: rgba(50, 181, 122, 0.15);
+}
+
+.blue {
+  --accent-color: var(--color-kpi-blue);
+  --accent-bg: rgba(37, 99, 235, 0.12);
+  --glow-bg: rgba(37, 99, 235, 0.15);
+}
+
+.purple {
+  --accent-color: var(--color-kpi-purple);
+  --accent-bg: rgba(185, 6, 217, 0.12);
+  --glow-bg: rgba(185, 6, 217, 0.15);
+}
+
+.amber {
+  --accent-color: var(--color-kpi-amber);
+  --accent-bg: rgba(217, 119, 6, 0.12);
+  --glow-bg: rgba(217, 119, 6, 0.15);
+}
+
+.red {
+  --accent-color: var(--color-kpi-red);
+  --accent-bg: rgba(220, 38, 38, 0.12);
+  --glow-bg: rgba(220, 38, 38, 0.15);
+}

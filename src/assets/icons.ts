@@ -1,0 +1,64 @@
+// Central map of the project's existing icon assets to the semantic role
+// they play in the SIM Applet Operations UI. Icons are rendered as inline
+// React SVG components (see Icons.tsx) rather than <img src> references so
+// a production build can be inlined into a single portable HTML file.
+import {
+  IconLayers,
+  IconUpload,
+  IconDeviceMonitor,
+  IconArrowRight,
+  IconBlocked,
+  IconChevronDownGray,
+  IconShieldCheck,
+  IconAlertCircle,
+  IconCheckCircle,
+  IconChevronDownDark,
+  IconDeviceFrame,
+  IconGrid,
+  IconDocument,
+  IconUploadTray,
+  IconTrend,
+  IconMessage,
+  IconChevronBreadcrumb,
+  IconChartBars,
+  IconMapping,
+  IconEdit,
+  IconEye,
+  IconChevronRight,
+  IconMapPin,
+  IconBuilding,
+  IconInfo,
+  IconDownload,
+} from './svgIcons';
+import tierOneLogo from './source/t1.png';
+
+export const icons = {
+  layers: IconLayers,
+  upload: IconUpload,
+  deviceMonitor: IconDeviceMonitor,
+  arrowRight: IconArrowRight,
+  blocked: IconBlocked,
+  chevronDownGray: IconChevronDownGray,
+  shieldCheck: IconShieldCheck,
+  alertCircle: IconAlertCircle,
+  checkCircle: IconCheckCircle,
+  chevronDownDark: IconChevronDownDark,
+  deviceFrame: IconDeviceFrame,
+  grid: IconGrid,
+  document: IconDocument,
+  uploadTray: IconUploadTray,
+  trend: IconTrend,
+  message: IconMessage,
+  chevronBreadcrumb: IconChevronBreadcrumb,
+  chartBars: IconChartBars,
+  mapping: IconMapping,
+  edit: IconEdit,
+  eye: IconEye,
+  chevronRight: IconChevronRight,
+  mapPin: IconMapPin,
+  building: IconBuilding,
+  info: IconInfo,
+  download: IconDownload,
+};
+
+export { tierOneLogo };

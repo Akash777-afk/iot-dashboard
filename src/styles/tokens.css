@@ -1,0 +1,65 @@
+:root {
+  /* Brand */
+  --color-primary-navy: #102a54;
+  --color-secondary-navy: #17356b;
+  --color-accent-green: #32b57a;
+
+  /* Surfaces */
+  --color-bg-page: #fcfcfc;
+  --color-surface-subtle: #f8fafc;
+  --color-white: #ffffff;
+
+  /* Text */
+  --color-text-primary: #172033;
+  --color-text-secondary: #90a1b9;
+  --color-text-table-header: #62748e;
+
+  /* Borders / dividers */
+  --color-border-light: #e2e8f0;
+  --color-divider: #f1f5f9;
+
+  /* Semantic status colors */
+  --color-status-active: #32b57a;
+  --color-status-active-bg: rgba(50, 181, 122, 0.12);
+  --color-status-amber: #d97706;
+  --color-status-amber-bg: rgba(217, 119, 6, 0.12);
+  --color-status-red: #dc2626;
+  --color-status-red-bg: rgba(220, 38, 38, 0.12);
+  --color-status-blue: #2563eb;
+  --color-status-blue-bg: rgba(37, 99, 235, 0.12);
+
+  /* KPI accent colors */
+  --color-kpi-neutral: #62748e;
+  --color-kpi-green: #32b57a;
+  --color-kpi-blue: #2563eb;
+  --color-kpi-purple: #b906d9;
+  --color-kpi-amber: #d97706;
+  --color-kpi-red: #dc2626;
+
+  /* Radii (scaled 0.75x from the original desktop reference) */
+  --radius-card: 12px;
+  --radius-container: 16.5px;
+  --radius-control: 7.5px;
+  --radius-pill: 999px;
+
+  /* Shadows (scaled 0.75x) */
+  --shadow-card: 0 1.5px 9px rgba(0, 0, 0, 0.22);
+  --shadow-container: 0 1.5px 9px rgba(0, 0, 0, 0.25);
+  --shadow-header: 0 1.5px 9px rgba(0, 0, 0, 0.08);
+
+  /* Layout (scaled 0.75x) */
+  --sidebar-width: 175.5px;
+  --header-height: 48px;
+  --content-padding-x: 27px;
+  --content-padding-y: 24px;
+  --content-gap: 18px;
+
+  /* Typography (scaled 0.75x) */
+  --font-family-base: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-size-xl: 16.5px;
+  --font-size-lg: 13.5px;
+  --font-size-md: 12px;
+  --font-size-base: 12px;
+  --font-size-sm: 9px;
+  --font-size-xs: 8.25px;
+}

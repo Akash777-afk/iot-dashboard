@@ -1,0 +1,121 @@
+.title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  margin: 4.5px 0 18px;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.tableContainer {
+  background: var(--color-white);
+  border-radius: var(--radius-container);
+  box-shadow: var(--shadow-container);
+  padding: 18px;
+}
+
+.subSection {
+  margin-top: 18px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.toolbar > :nth-child(1) {
+  flex: 2 1 0;
+  min-width: 0;
+  max-width: none;
+}
+
+.toolbar > :nth-child(2),
+.toolbar > :nth-child(3),
+.toolbar > :nth-child(4) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.tableScroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 348px;
+  border-radius: 7.5px;
+}
+
+.table {
+  width: 100%;
+  min-width: 1100px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  padding: 9px 12px;
+  background: var(--color-divider);
+  color: var(--color-text-table-header);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.table th:first-child {
+  border-radius: 7.5px 0 0 7.5px;
+}
+
+.table th:last-child {
+  border-radius: 0 7.5px 7.5px 0;
+}
+
+.table td {
+  padding: 11.25px 12px;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-divider);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meterCell {
+  font-weight: 600;
+}
+
+.row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.row:hover {
+  background: var(--color-divider);
+}
+
+.row:last-child td {
+  border-bottom: none;
+}
+
+.emptyState {
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: 24px 12px;
+  white-space: normal;
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
