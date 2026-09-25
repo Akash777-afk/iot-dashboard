@@ -187,9 +187,9 @@ export function IconTrend(props: IconProps) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <g clipPath="url(#clip0_3_53)">
-        <path d="M0.998474 12.9804L4.99243 7.98791L7.9879 10.9834L11.9819 3.99396L16.9743 8.9864" stroke="white" strokeWidth="1.49773" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M0.998489 13.9789C1.54994 13.9789 1.99698 13.5318 1.99698 12.9804C1.99698 12.4289 1.54994 11.9819 0.998489 11.9819C0.447039 11.9819 0 12.4289 0 12.9804C0 13.5318 0.447039 13.9789 0.998489 13.9789Z" fill="white"/>
-        <path d="M16.9743 9.98489C17.5258 9.98489 17.9728 9.53785 17.9728 8.9864C17.9728 8.43495 17.5258 7.98792 16.9743 7.98792C16.4229 7.98792 15.9758 8.43495 15.9758 8.9864C15.9758 9.53785 16.4229 9.98489 16.9743 9.98489Z" fill="white"/>
+        <path d="M0.998474 12.9804L4.99243 7.98791L7.9879 10.9834L11.9819 3.99396L16.9743 8.9864" stroke="currentColor" strokeWidth="1.49773" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M0.998489 13.9789C1.54994 13.9789 1.99698 13.5318 1.99698 12.9804C1.99698 12.4289 1.54994 11.9819 0.998489 11.9819C0.447039 11.9819 0 12.4289 0 12.9804C0 13.5318 0.447039 13.9789 0.998489 13.9789Z" fill="currentColor"/>
+        <path d="M16.9743 9.98489C17.5258 9.98489 17.9728 9.53785 17.9728 8.9864C17.9728 8.43495 17.5258 7.98792 16.9743 7.98792C16.4229 7.98792 15.9758 8.43495 15.9758 8.9864C15.9758 9.53785 16.4229 9.98489 16.9743 9.98489Z" fill="currentColor"/>
       </g>
       <defs>
         <clipPath id="clip0_3_53">
@@ -284,6 +284,29 @@ export function IconDownload(props: IconProps) {
       <path d="M9 1.5V11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M5.5 7.5L9 11L12.5 7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M3 13.5V15C3 15.5523 3.44772 16 4 16H14C14.5523 16 15 15.5523 15 15V13.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function IconRefresh(props: IconProps) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path
+        d="M15 9C15 12.3137 12.3137 15 9 15C6.53213 15 4.41213 13.5228 3.48409 11.4"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3 9C3 5.68629 5.68629 3 9 3C11.4679 3 13.5879 4.47715 14.5159 6.6"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M3 12V9H6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15 6V9H12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

@@ -35,6 +35,12 @@
   --color-kpi-purple: #b906d9;
   --color-kpi-amber: #d97706;
   --color-kpi-red: #dc2626;
+  --color-kpi-yellow: #eab308;
+
+  /* Chart series colors — blue-only palette reserved for the Analytics health-category visualizations (Critical/At Risk/Healthy), which intentionally do not use the red/amber/green status palette */
+  --color-chart-blue-dark: #1e3a8a;
+  --color-chart-blue-mid: #2563eb;
+  --color-chart-blue-light: #93c5fd;
 
   /* Radii (scaled 0.75x from the original desktop reference) */
   --radius-card: 12px;
@@ -58,6 +64,7 @@
   --font-family-base: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   --font-size-xl: 16.5px;
   --font-size-lg: 13.5px;
+  --font-size-legend: 10px;
   --font-size-md: 12px;
   --font-size-base: 12px;
   --font-size-sm: 9px;

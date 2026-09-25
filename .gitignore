@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Generated full-dataset exports (regenerate via `npm run export:master-dataset`)
+master-dataset-enhanced.xlsx
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,10 +1,19 @@
 import type { BadgeTone } from '../components/StatusBadge';
 
-export type SeverityId = 'critical' | 'fair' | 'healthy';
-export type Tone = SeverityId | 'info';
-
 export type CircleId = 'north' | 'west' | 'south' | 'east';
-export type CustomerId = 'adani' | 'jio' | 'torrent';
+export type CustomerId =
+  | 'adani'
+  | 'jio'
+  | 'torrent'
+  | 'tpwod'
+  | 'mgmotors'
+  | 'kiaindia'
+  | 'revoltmotors'
+  | 'paytm'
+  | 'pinelabs'
+  | 'heromotocorp'
+  | 'tvsmotor'
+  | 'hyundaimotors';
 export type IssueSeverity = 'Critical' | 'Warning';
 export type IssueStatus = 'Open' | 'Investigating' | 'Monitoring' | 'Resolved';
 
@@ -17,7 +26,7 @@ export interface CircleMeta {
 export const CIRCLES: CircleMeta[] = [
   { id: 'north', label: 'North', city: 'Delhi' },
   { id: 'west', label: 'West', city: 'Mumbai' },
-  { id: 'south', label: 'South', city: 'Bangalore' },
+  { id: 'south', label: 'South', city: 'Bengaluru' },
   { id: 'east', label: 'East', city: 'Kolkata' },
 ];
 
@@ -28,9 +37,18 @@ export interface CustomerMeta {
 }
 
 export const CUSTOMERS: CustomerMeta[] = [
-  { id: 'adani', label: 'Adani Energy Solutions', primaryCircle: 'north' },
+  { id: 'adani', label: 'Adani Energy', primaryCircle: 'north' },
   { id: 'jio', label: 'Jio Power', primaryCircle: 'west' },
   { id: 'torrent', label: 'Torrent Power', primaryCircle: 'east' },
+  { id: 'tpwod', label: 'TPWOD', primaryCircle: 'east' },
+  { id: 'mgmotors', label: 'MG Motors', primaryCircle: 'west' },
+  { id: 'kiaindia', label: 'Kia India', primaryCircle: 'south' },
+  { id: 'revoltmotors', label: 'Revolt Motors', primaryCircle: 'north' },
+  { id: 'paytm', label: 'Paytm', primaryCircle: 'north' },
+  { id: 'pinelabs', label: 'Pine Labs', primaryCircle: 'west' },
+  { id: 'heromotocorp', label: 'Hero MotoCorp', primaryCircle: 'north' },
+  { id: 'tvsmotor', label: 'TVS Motor', primaryCircle: 'south' },
+  { id: 'hyundaimotors', label: 'Hyundai Motors', primaryCircle: 'south' },
 ];
 
 export interface NetworkIssue {
@@ -84,19 +102,73 @@ export const networkIssues: NetworkIssue[] = [
   { id: 'NI-031', bts: 'BS-MM-0356', location: 'Worli, Mumbai', circle: 'west', customer: 'jio', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 31, sinr: 2.1, transport: 'HTTPS', status: 'Monitoring' },
   { id: 'NI-032', bts: 'BS-MM-0412', location: 'Thane, Mumbai', circle: 'west', customer: 'jio', problem: 'Firmware version', severity: 'Warning', affectedMeters: 16, sinr: 3.3, transport: 'SMS', status: 'Resolved' },
 
-  // South (Bangalore) — 6 issues
-  { id: 'NI-033', bts: 'BS-BG-0210', location: 'Whitefield, Bangalore', circle: 'south', customer: 'adani', problem: 'SINR degradation', severity: 'Critical', affectedMeters: 34, sinr: -0.4, transport: 'HTTPS', status: 'Open' },
-  { id: 'NI-034', bts: 'BS-BG-0210', location: 'Whitefield, Bangalore', circle: 'south', customer: 'adani', problem: 'Meter registration', severity: 'Warning', affectedMeters: 22, sinr: 1.3, transport: 'HTTPS', status: 'Monitoring' },
-  { id: 'NI-035', bts: 'BS-BG-0134', location: 'Koramangala, Bangalore', circle: 'south', customer: 'jio', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 19, sinr: 2.0, transport: 'SMS Fallback', status: 'Investigating' },
-  { id: 'NI-036', bts: 'BS-BG-0134', location: 'Koramangala, Bangalore', circle: 'south', customer: 'jio', problem: 'Firmware version', severity: 'Warning', affectedMeters: 25, sinr: 1.8, transport: 'HTTPS', status: 'Open' },
-  { id: 'NI-037', bts: 'BS-BG-0067', location: 'Electronic City, Bangalore', circle: 'south', customer: 'torrent', problem: 'SINR degradation', severity: 'Warning', affectedMeters: 15, sinr: 2.4, transport: 'HTTPS', status: 'Monitoring' },
-  { id: 'NI-038', bts: 'BS-BG-0067', location: 'Electronic City, Bangalore', circle: 'south', customer: 'torrent', problem: 'Meter registration', severity: 'Warning', affectedMeters: 11, sinr: 2.7, transport: 'SMS', status: 'Resolved' },
+  // South (Bengaluru) — 6 issues
+  { id: 'NI-033', bts: 'BS-BG-0210', location: 'Whitefield, Bengaluru', circle: 'south', customer: 'adani', problem: 'SINR degradation', severity: 'Critical', affectedMeters: 34, sinr: -0.4, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-034', bts: 'BS-BG-0210', location: 'Whitefield, Bengaluru', circle: 'south', customer: 'adani', problem: 'Meter registration', severity: 'Warning', affectedMeters: 22, sinr: 1.3, transport: 'HTTPS', status: 'Monitoring' },
+  { id: 'NI-035', bts: 'BS-BG-0134', location: 'Koramangala, Bengaluru', circle: 'south', customer: 'jio', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 19, sinr: 2.0, transport: 'SMS Fallback', status: 'Investigating' },
+  { id: 'NI-036', bts: 'BS-BG-0134', location: 'Koramangala, Bengaluru', circle: 'south', customer: 'jio', problem: 'Firmware version', severity: 'Warning', affectedMeters: 25, sinr: 1.8, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-037', bts: 'BS-BG-0067', location: 'Electronic City, Bengaluru', circle: 'south', customer: 'torrent', problem: 'SINR degradation', severity: 'Warning', affectedMeters: 15, sinr: 2.4, transport: 'HTTPS', status: 'Monitoring' },
+  { id: 'NI-038', bts: 'BS-BG-0067', location: 'Electronic City, Bengaluru', circle: 'south', customer: 'torrent', problem: 'Meter registration', severity: 'Warning', affectedMeters: 11, sinr: 2.7, transport: 'SMS', status: 'Resolved' },
 
   // East (Kolkata) — 4 issues
   { id: 'NI-039', bts: 'BS-KK-0158', location: 'Salt Lake, Kolkata', circle: 'east', customer: 'torrent', problem: 'SINR degradation', severity: 'Critical', affectedMeters: 42, sinr: -1.1, transport: 'HTTPS', status: 'Open' },
   { id: 'NI-040', bts: 'BS-KK-0158', location: 'Salt Lake, Kolkata', circle: 'east', customer: 'torrent', problem: 'Meter registration', severity: 'Warning', affectedMeters: 23, sinr: 1.0, transport: 'HTTPS', status: 'Investigating' },
   { id: 'NI-041', bts: 'BS-KK-0299', location: 'Park Street, Kolkata', circle: 'east', customer: 'torrent', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 18, sinr: 1.7, transport: 'SMS Fallback', status: 'Monitoring' },
   { id: 'NI-042', bts: 'BS-KK-0299', location: 'Park Street, Kolkata', circle: 'east', customer: 'torrent', problem: 'Firmware version', severity: 'Warning', affectedMeters: 13, sinr: 2.2, transport: 'HTTPS', status: 'Open' },
+
+  // TPWOD (East — Kolkata) — 4 issues
+  { id: 'NI-043', bts: 'BS-KK-0512', location: 'Salt Lake, Kolkata', circle: 'east', customer: 'tpwod', problem: 'Meter registration', severity: 'Critical', affectedMeters: 58, sinr: -2.1, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-044', bts: 'BS-KK-0512', location: 'Salt Lake, Kolkata', circle: 'east', customer: 'tpwod', problem: 'SINR degradation', severity: 'Warning', affectedMeters: 31, sinr: 1.4, transport: 'HTTPS', status: 'Monitoring' },
+  { id: 'NI-045', bts: 'BS-KK-0687', location: 'Park Street, Kolkata', circle: 'east', customer: 'tpwod', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 22, sinr: 2.0, transport: 'SMS Fallback', status: 'Investigating' },
+  { id: 'NI-046', bts: 'BS-KK-0687', location: 'Park Street, Kolkata', circle: 'east', customer: 'tpwod', problem: 'Firmware version', severity: 'Warning', affectedMeters: 14, sinr: 2.6, transport: 'HTTPS', status: 'Resolved' },
+
+  // MG Motors (West — Mumbai/Pune) — 4 issues
+  { id: 'NI-047', bts: 'BS-MM-0523', location: 'Andheri, Mumbai', circle: 'west', customer: 'mgmotors', problem: 'SINR degradation', severity: 'Critical', affectedMeters: 47, sinr: -1.8, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-048', bts: 'BS-MM-0523', location: 'Andheri, Mumbai', circle: 'west', customer: 'mgmotors', problem: 'Meter registration', severity: 'Warning', affectedMeters: 26, sinr: 1.1, transport: 'HTTPS', status: 'Monitoring' },
+  { id: 'NI-049', bts: 'BS-PN-0102', location: 'Hinjewadi, Pune', circle: 'west', customer: 'mgmotors', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 19, sinr: 2.3, transport: 'SMS', status: 'Investigating' },
+  { id: 'NI-050', bts: 'BS-PN-0102', location: 'Hinjewadi, Pune', circle: 'west', customer: 'mgmotors', problem: 'Firmware version', severity: 'Warning', affectedMeters: 12, sinr: 2.9, transport: 'HTTPS', status: 'Resolved' },
+
+  // Kia India (South — Hyderabad/Bengaluru) — 4 issues
+  { id: 'NI-051', bts: 'BS-HY-0233', location: 'Gachibowli, Hyderabad', circle: 'south', customer: 'kiaindia', problem: 'SINR degradation', severity: 'Critical', affectedMeters: 52, sinr: -2.6, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-052', bts: 'BS-HY-0233', location: 'Gachibowli, Hyderabad', circle: 'south', customer: 'kiaindia', problem: 'Meter registration', severity: 'Warning', affectedMeters: 28, sinr: 1.0, transport: 'HTTPS', status: 'Investigating' },
+  { id: 'NI-053', bts: 'BS-BG-0356', location: 'Whitefield, Bengaluru', circle: 'south', customer: 'kiaindia', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 17, sinr: 2.1, transport: 'SMS Fallback', status: 'Monitoring' },
+  { id: 'NI-054', bts: 'BS-BG-0356', location: 'Whitefield, Bengaluru', circle: 'south', customer: 'kiaindia', problem: 'Firmware version', severity: 'Warning', affectedMeters: 9, sinr: 2.8, transport: 'HTTPS', status: 'Resolved' },
+
+  // Revolt Motors (North — Delhi NCR) — 4 issues
+  { id: 'NI-055', bts: 'BS-DL-0845', location: 'Manesar, Delhi', circle: 'north', customer: 'revoltmotors', problem: 'Meter registration', severity: 'Critical', affectedMeters: 33, sinr: -1.4, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-056', bts: 'BS-DL-0845', location: 'Manesar, Delhi', circle: 'north', customer: 'revoltmotors', problem: 'SINR degradation', severity: 'Warning', affectedMeters: 20, sinr: 1.6, transport: 'HTTPS', status: 'Monitoring' },
+  { id: 'NI-057', bts: 'BS-DL-0912', location: 'Gurugram, Delhi', circle: 'north', customer: 'revoltmotors', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 15, sinr: 2.4, transport: 'SMS', status: 'Investigating' },
+  { id: 'NI-058', bts: 'BS-DL-0912', location: 'Gurugram, Delhi', circle: 'north', customer: 'revoltmotors', problem: 'Firmware version', severity: 'Warning', affectedMeters: 8, sinr: 3.0, transport: 'HTTPS', status: 'Resolved' },
+
+  // Paytm (North — Delhi NCR, West — Mumbai) — 4 issues
+  { id: 'NI-059', bts: 'BS-DL-0176', location: 'Noida, Delhi', circle: 'north', customer: 'paytm', problem: 'SINR degradation', severity: 'Critical', affectedMeters: 74, sinr: -2.2, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-060', bts: 'BS-DL-0176', location: 'Noida, Delhi', circle: 'north', customer: 'paytm', problem: 'Meter registration', severity: 'Warning', affectedMeters: 42, sinr: 0.9, transport: 'HTTPS', status: 'Investigating' },
+  { id: 'NI-061', bts: 'BS-MM-0289', location: 'Kurla, Mumbai', circle: 'west', customer: 'paytm', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 35, sinr: 1.8, transport: 'SMS Fallback', status: 'Monitoring' },
+  { id: 'NI-062', bts: 'BS-MM-0289', location: 'Kurla, Mumbai', circle: 'west', customer: 'paytm', problem: 'Firmware version', severity: 'Warning', affectedMeters: 21, sinr: 2.3, transport: 'HTTPS', status: 'Resolved' },
+
+  // Pine Labs (West — Mumbai, South — Bengaluru) — 4 issues
+  { id: 'NI-063', bts: 'BS-MM-0467', location: 'Lower Parel, Mumbai', circle: 'west', customer: 'pinelabs', problem: 'SINR degradation', severity: 'Critical', affectedMeters: 39, sinr: -1.6, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-064', bts: 'BS-MM-0467', location: 'Lower Parel, Mumbai', circle: 'west', customer: 'pinelabs', problem: 'Meter registration', severity: 'Warning', affectedMeters: 24, sinr: 1.2, transport: 'HTTPS', status: 'Monitoring' },
+  { id: 'NI-065', bts: 'BS-BG-0198', location: 'Indiranagar, Bengaluru', circle: 'south', customer: 'pinelabs', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 18, sinr: 2.0, transport: 'SMS', status: 'Investigating' },
+  { id: 'NI-066', bts: 'BS-BG-0198', location: 'Indiranagar, Bengaluru', circle: 'south', customer: 'pinelabs', problem: 'Firmware version', severity: 'Warning', affectedMeters: 11, sinr: 2.7, transport: 'HTTPS', status: 'Resolved' },
+
+  // Hero MotoCorp (North — Delhi NCR) — 4 issues
+  { id: 'NI-067', bts: 'BS-DL-0567', location: 'Gurugram, Delhi', circle: 'north', customer: 'heromotocorp', problem: 'Meter registration', severity: 'Critical', affectedMeters: 45, sinr: -1.9, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-068', bts: 'BS-DL-0567', location: 'Gurugram, Delhi', circle: 'north', customer: 'heromotocorp', problem: 'SINR degradation', severity: 'Warning', affectedMeters: 27, sinr: 1.3, transport: 'HTTPS', status: 'Investigating' },
+  { id: 'NI-069', bts: 'BS-DL-0699', location: 'Faridabad, Delhi', circle: 'north', customer: 'heromotocorp', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 19, sinr: 2.2, transport: 'SMS Fallback', status: 'Monitoring' },
+  { id: 'NI-070', bts: 'BS-DL-0699', location: 'Faridabad, Delhi', circle: 'north', customer: 'heromotocorp', problem: 'Firmware version', severity: 'Warning', affectedMeters: 10, sinr: 2.9, transport: 'HTTPS', status: 'Resolved' },
+
+  // TVS Motor (South — Chennai) — 4 issues
+  { id: 'NI-071', bts: 'BS-CH-0145', location: 'T Nagar, Chennai', circle: 'south', customer: 'tvsmotor', problem: 'SINR degradation', severity: 'Critical', affectedMeters: 41, sinr: -2.0, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-072', bts: 'BS-CH-0145', location: 'T Nagar, Chennai', circle: 'south', customer: 'tvsmotor', problem: 'Meter registration', severity: 'Warning', affectedMeters: 23, sinr: 1.4, transport: 'HTTPS', status: 'Monitoring' },
+  { id: 'NI-073', bts: 'BS-CH-0287', location: 'Velachery, Chennai', circle: 'south', customer: 'tvsmotor', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 16, sinr: 2.1, transport: 'SMS', status: 'Investigating' },
+  { id: 'NI-074', bts: 'BS-CH-0287', location: 'Velachery, Chennai', circle: 'south', customer: 'tvsmotor', problem: 'Firmware version', severity: 'Warning', affectedMeters: 9, sinr: 2.6, transport: 'HTTPS', status: 'Resolved' },
+
+  // Hyundai Motors (South — Chennai/Hyderabad) — 4 issues
+  { id: 'NI-075', bts: 'BS-CH-0398', location: 'Anna Nagar, Chennai', circle: 'south', customer: 'hyundaimotors', problem: 'Meter registration', severity: 'Critical', affectedMeters: 36, sinr: -1.7, transport: 'HTTPS', status: 'Open' },
+  { id: 'NI-076', bts: 'BS-CH-0398', location: 'Anna Nagar, Chennai', circle: 'south', customer: 'hyundaimotors', problem: 'SINR degradation', severity: 'Warning', affectedMeters: 21, sinr: 1.5, transport: 'HTTPS', status: 'Investigating' },
+  { id: 'NI-077', bts: 'BS-HY-0301', location: 'Kondapur, Hyderabad', circle: 'south', customer: 'hyundaimotors', problem: 'SIM applet version', severity: 'Warning', affectedMeters: 14, sinr: 2.3, transport: 'SMS Fallback', status: 'Monitoring' },
+  { id: 'NI-078', bts: 'BS-HY-0301', location: 'Kondapur, Hyderabad', circle: 'south', customer: 'hyundaimotors', problem: 'Firmware version', severity: 'Warning', affectedMeters: 8, sinr: 2.8, transport: 'HTTPS', status: 'Resolved' },
 ];
 
 export const ISSUE_STATUS_TONE: Record<IssueStatus, BadgeTone> = {
@@ -110,127 +182,5 @@ export const ISSUE_SEVERITY_TONE: Record<IssueSeverity, BadgeTone> = {
   Critical: 'red',
   Warning: 'amber',
 };
-
-export const trendLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-export const trendGood = [1220, 1216, 1210, 1206, 1201, 1197, 1200];
-export const trendFair = [130, 133, 138, 142, 148, 152, 150];
-export const trendPoor = [10, 10, 11, 12, 13, 14, 15];
-
-export interface HealthScore {
-  score: number;
-  deviceId: string;
-  statusLabel: string;
-  risk: number;
-  tone: SeverityId;
-}
-
-export const healthScores: HealthScore[] = [
-  { score: 92, deviceId: 'SM-BG-0089', statusLabel: 'Healthy', risk: 2, tone: 'healthy' },
-  { score: 68, deviceId: 'SM-MM-0245', statusLabel: 'Fair', risk: 35, tone: 'fair' },
-  { score: 24, deviceId: 'SM-DL-0401', statusLabel: 'Critical', risk: 85, tone: 'critical' },
-  { score: 18, deviceId: 'SM-DL-0512', statusLabel: 'Critical', risk: 78, tone: 'critical' },
-];
-
-export interface DegradationRow {
-  deviceId: string;
-  rate: number;
-  tone: SeverityId;
-}
-
-export const degradationVelocity: DegradationRow[] = [
-  { deviceId: 'SM-DL-0401-001', rate: -0.85, tone: 'critical' },
-  { deviceId: 'SM-DL-0512-045', rate: -0.62, tone: 'critical' },
-  { deviceId: 'SM-MM-0187-234', rate: -0.38, tone: 'fair' },
-  { deviceId: 'SM-BG-0089-001', rate: 0.15, tone: 'healthy' },
-];
-
-export const degradationAlert = 'SM-DL-0401-001 will reach -10dB in 5.8 hours';
-
-export interface SiteRow {
-  site: string;
-  location: string;
-  value: number;
-  issueLabel: string;
-  tone: Tone;
-}
-
-export const topSites: SiteRow[] = [
-  { site: 'BS-BG-0089', location: 'Bangalore', value: 11.5, issueLabel: '0 issues', tone: 'healthy' },
-  { site: 'BS-MM-0245', location: 'Mumbai', value: 5.2, issueLabel: '4 issues', tone: 'info' },
-  { site: 'BS-DL-0512', location: 'Delhi', value: 1.2, issueLabel: '12 issues', tone: 'fair' },
-];
-
-export const bottomSites: SiteRow[] = [
-  { site: 'BS-DL-0401', location: 'Delhi', value: -2.5, issueLabel: '18 CRITICAL', tone: 'critical' },
-  { site: 'BS-MM-0187', location: 'Mumbai', value: 3.8, issueLabel: '8 MEDIUM', tone: 'fair' },
-  { site: 'BS-BG-0089', location: 'Bangalore', value: 11.5, issueLabel: '0 NONE', tone: 'healthy' },
-];
-
-export interface RegionCoverage {
-  region: string;
-  city: string;
-  quality: number;
-  tone: 'healthy' | 'fair' | 'info' | 'teal';
-}
-
-export const regionCoverage: RegionCoverage[] = [
-  { region: 'North', city: 'Delhi', quality: 6, tone: 'healthy' },
-  { region: 'West', city: 'Mumbai', quality: 5, tone: 'fair' },
-  { region: 'South', city: 'Bangalore', quality: 9, tone: 'info' },
-  { region: 'East', city: 'Kolkata', quality: 8, tone: 'teal' },
-];
-
-export const problemAreas = 'North Delhi (BS-DL-0401, BS-DL-0512) | West Mumbai';
-
-export interface CustomerQuality {
-  label: string;
-  score: number;
-  tone: Tone;
-}
-
-export const customerQuality: CustomerQuality[] = [
-  { label: 'Adani Power', score: 6.8, tone: 'fair' },
-  { label: 'Jio Power', score: 7.2, tone: 'info' },
-  { label: 'Torrent Power', score: 9.1, tone: 'healthy' },
-];
-
-export interface CellSiteRow {
-  site: string;
-  location: string;
-  devices: number;
-  sinr: number;
-  bad: number;
-  customer: string;
-  statusLabel: string;
-  tone: SeverityId;
-}
-
-export const cellSitePerformance: CellSiteRow[] = [
-  { site: 'BS-DL-0401', location: 'Delhi-41', devices: 287, sinr: -2.5, bad: 18, customer: 'Adani', statusLabel: 'Critical', tone: 'critical' },
-  { site: 'BS-DL-0512', location: 'Delhi-51', devices: 245, sinr: 1.2, bad: 12, customer: 'Adani', statusLabel: 'Warning', tone: 'fair' },
-  { site: 'BS-MM-0187', location: 'Mumbai', devices: 312, sinr: 3.8, bad: 8, customer: 'Adani', statusLabel: 'Warning', tone: 'fair' },
-  { site: 'BS-MM-0245', location: 'Bandra', devices: 198, sinr: 5.2, bad: 4, customer: 'Jio', statusLabel: 'Warning', tone: 'fair' },
-  { site: 'BS-BG-0089', location: 'Bangalore', devices: 156, sinr: 11.5, bad: 0, customer: 'Torrent', statusLabel: 'Healthy', tone: 'healthy' },
-];
-
-export type TrendDirection = 'Declining' | 'Stable' | 'Improving';
-
-export interface HighRiskDevice {
-  deviceId: string;
-  site: string;
-  customer: string;
-  sinr: number;
-  trend: TrendDirection;
-  action: 'URGENT' | 'MONITOR';
-}
-
-export const highRiskDevices: HighRiskDevice[] = [
-  { deviceId: 'SM-DL-0401-001', site: 'BS-DL-0401', customer: 'Adani', sinr: -4.2, trend: 'Declining', action: 'URGENT' },
-  { deviceId: 'SM-DL-0512-045', site: 'BS-DL-0512', customer: 'Adani', sinr: -1.5, trend: 'Declining', action: 'URGENT' },
-  { deviceId: 'SM-MM-0187-234', site: 'BS-MM-0187', customer: 'Adani', sinr: 0.8, trend: 'Stable', action: 'MONITOR' },
-  { deviceId: 'SM-MM-0245-156', site: 'BS-MM-0245', customer: 'Jio', sinr: 2.3, trend: 'Improving', action: 'MONITOR' },
-  { deviceId: 'SM-DL-0401-089', site: 'BS-DL-0401', customer: 'Adani', sinr: -0.7, trend: 'Declining', action: 'URGENT' },
-];
 
 export const analyticsFooter = 'Last Updated: 2024-01-15 14:32 UTC · Refresh: 5 min · Airtel IoT NOC v2.1';

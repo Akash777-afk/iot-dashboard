@@ -20,6 +20,7 @@ const accentClassMap: Record<KpiCardData['accent'], string> = {
   purple: styles.purple,
   amber: styles.amber,
   red: styles.red,
+  yellow: styles.yellow,
 };
 
 interface KpiCardProps {

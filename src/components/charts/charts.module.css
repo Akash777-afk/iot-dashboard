@@ -8,6 +8,23 @@
   height: auto;
   display: block;
   overflow: visible;
+  user-select: none;
+}
+
+.svg path,
+.svg rect,
+.svg circle,
+.donutSvg circle {
+  transition: all 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/** Wraps a chart when its category SET (not just values) changes — see useCategorySwapTransition. */
+.chartFade {
+  transition: opacity 150ms ease;
+}
+
+.chartFadeHidden {
+  opacity: 0;
 }
 
 .gridLine {
@@ -16,7 +33,7 @@
 }
 
 .axisLabel {
-  font-size: 7.5px;
+  font-size: 14px;
   fill: var(--color-text-secondary);
   font-family: var(--font-family-base);
 }
@@ -25,6 +42,19 @@
   stroke: var(--color-border-light);
   stroke-width: 1;
   stroke-dasharray: 3 3;
+}
+
+.sinrThresholdLine {
+  stroke: var(--color-border-light);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.sinrThresholdLabel {
+  font-size: 9px;
+  font-style: italic;
+  fill: var(--color-text-secondary);
+  font-family: var(--font-family-base);
 }
 
 .tooltip {
@@ -90,7 +120,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: var(--font-size-legend);
   color: var(--color-text-secondary);
   font-weight: 600;
 }
@@ -104,22 +134,54 @@
 
 .donutSvg {
   width: 100%;
-  max-width: 210px;
+  max-width: 160px;
   height: auto;
   display: block;
   margin: 0 auto;
+  user-select: none;
 }
 
+/* Sized down from the chart's earlier 200-viewbox/25px pairing to match the
+   smaller 150-viewbox donut, so the center value keeps a similar real
+   on-screen size and still clears the narrower inner ring (see DonutChart.tsx). */
 .donutCenterValue {
   font-family: var(--font-family-base);
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 700;
   fill: var(--color-text-primary);
 }
 
 .donutCenterCaption {
   font-family: var(--font-family-base);
-  font-size: 10.5px;
+  font-size: 9px;
   font-weight: 600;
   fill: var(--color-text-secondary);
+}
+
+.deviceBubbleLabel {
+  font-family: var(--font-family-base);
+  font-size: 10px;
+  font-weight: 700;
+  fill: var(--color-text-primary);
+}
+
+.deviceBubbleSubLabel {
+  font-family: var(--font-family-base);
+  font-size: 7.5px;
+  font-weight: 500;
+  fill: var(--color-text-secondary);
+}
+
+.polarSiteLabel {
+  font-family: var(--font-family-base);
+  font-size: 9.5px;
+  font-weight: 500;
+  fill: var(--color-text-secondary);
+}
+
+.barValueLabel {
+  font-family: var(--font-family-base);
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--color-text-primary);
 }

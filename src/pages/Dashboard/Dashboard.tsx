@@ -8,15 +8,21 @@ import { Pagination } from '../../components/Pagination';
 import { FilterEmptyState } from '../../components/FilterEmptyState';
 import { DatasetInfoBar } from '../../components/DatasetInfoBar';
 import { icons } from '../../assets/icons';
-import { kpiCards } from '../../data/meters';
+import { type KpiCardData } from '../../data/meters';
 import { useVirtualRows } from '../../hooks/useVirtualRows';
+import { useDataVersion } from '../../hooks/useDataVersion';
 import {
   queryDevices,
   queryAllDevices,
+  getTotalRecords,
+  getOutOfReachCount,
+  getAppletUpdateCount,
+  getSecurityBlacklistedCount,
   DEVICE_STATUS_TONE,
   DEVICE_TYPES,
   LOCATIONS,
   CUSTOMERS,
+  UI_ROW_CAP,
   type DeviceTypeName,
   type LocationName,
   type CustomerName,
@@ -39,6 +45,60 @@ export function Dashboard() {
   const [exporting, setExporting] = useState(false);
   const navigate = useNavigate();
   const hasFilter = Boolean(customerFilter || deviceTypeFilter || locationFilter);
+  const dataVersion = useDataVersion();
+
+  const allKpiCards: KpiCardData[] = useMemo(
+    () => [
+      {
+        id: 'iot-devices',
+        label: 'IoT devices',
+        value: getTotalRecords().toLocaleString(),
+        actionLabel: 'view all devices',
+        accent: 'neutral',
+        icon: 'layers',
+        to: '/devices',
+      },
+      {
+        id: 'out-of-reach',
+        label: 'Out of Reach',
+        value: getOutOfReachCount().toLocaleString(),
+        actionLabel: 'view unreachable devices',
+        accent: 'yellow',
+        icon: 'alert',
+        to: '/devices',
+        toState: { statusFilter: 'Out of Reach' },
+      },
+      {
+        id: 'sim-applet-rollout',
+        label: 'SIM Applet rollout',
+        value: '25,003',
+        actionLabel: 'view SIM Applet',
+        accent: 'blue',
+        icon: 'upload',
+        to: '/sim-applet',
+      },
+      {
+        id: 'applet-update-status',
+        label: 'Applet update status',
+        value: getAppletUpdateCount().toLocaleString(),
+        actionLabel: 'view devices require update',
+        accent: 'purple',
+        icon: 'message',
+        to: '/sim-applet',
+        toState: { tab: 'overview', scrollTo: 'devices-requiring-update' },
+      },
+      {
+        id: 'blacklisted',
+        label: 'Blacklisted',
+        value: getSecurityBlacklistedCount().toLocaleString(),
+        actionLabel: 'view devices',
+        accent: 'red',
+        icon: 'blocked',
+        to: '/devices',
+      },
+    ],
+    [dataVersion]
+  );
 
   const { total: totalMatches, rows: pageDevices } = useMemo(
     () =>
@@ -49,9 +109,10 @@ export function Dashboard() {
             location: locationFilter,
             page: currentPage,
             pageSize: PAGE_SIZE,
+            maxTotal: UI_ROW_CAP,
           })
         : { total: 0, rows: [] },
-    [hasFilter, customerFilter, deviceTypeFilter, locationFilter, currentPage]
+    [hasFilter, customerFilter, deviceTypeFilter, locationFilter, currentPage, dataVersion]
   );
 
   useEffect(() => {
@@ -71,7 +132,7 @@ export function Dashboard() {
       const { rows } = queryAllDevices({});
       downloadCsv(
         'utility-meters-export.csv',
-        ['Utility Meter', 'Device ID', 'Device Type', 'Customer', 'Location', 'Firmware', 'Applet', 'Status', 'Issue Category'],
+        ['IoT Devices', 'Device ID', 'Device Type', 'Customer', 'Location', 'Firmware', 'Applet', 'Status', 'Issue Category'],
         rows.map((d) => [d.meter, d.deviceId, d.deviceType, d.customer, d.location, d.firmware, d.applet, d.status, d.issueCategory])
       );
       setExporting(false);
@@ -84,7 +145,7 @@ export function Dashboard() {
       <p className={styles.subtitle}>High-level view of utility meters, applet health and device security.</p>
 
       <div className={styles.kpiGrid}>
-        {kpiCards.map((card) => (
+        {allKpiCards.map((card) => (
           <KpiCard key={card.id} data={card} />
         ))}
       </div>
@@ -137,18 +198,18 @@ export function Dashboard() {
             <div className={styles.tableScroll} ref={containerRef} onScroll={onScroll}>
               <table className={styles.table}>
                 <colgroup>
-                  <col style={{ width: '12%' }} />
-                  <col style={{ width: '12%' }} />
-                  <col style={{ width: '15%' }} />
-                  <col style={{ width: '20%' }} />
+                  <col style={{ width: '13%' }} />
                   <col style={{ width: '11%' }} />
-                  <col style={{ width: '12%' }} />
-                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '18%' }} />
+                  <col style={{ width: '16%' }} />
+                  <col style={{ width: '11%' }} />
+                  <col style={{ width: '7%' }} />
                   <col style={{ width: '10%' }} />
                 </colgroup>
                 <thead>
                   <tr>
-                    <th>Utility meter</th>
+                    <th>IoT Devices</th>
                     <th>Device ID</th>
                     <th>Device Type</th>
                     <th>Customer</th>

@@ -1,14 +1,21 @@
-import { useState, type SVGProps } from 'react';
+import { useEffect, useMemo, useRef, useState, type SVGProps } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppLayout } from '../../layout/AppLayout';
 import { StatusBadge } from '../../components/StatusBadge';
 import { UpgradeAppletModal } from '../../components/UpgradeAppletModal';
 import { BulkUpdateModal } from '../../components/BulkUpdateModal';
 import { TabBar, type TabBarItem } from '../../components/TabBar';
+import { Pagination } from '../../components/Pagination';
+import { DatasetInfoBar } from '../../components/DatasetInfoBar';
 import { icons } from '../../assets/icons';
-import { appletVersionInfo, devicesRequiringUpdate, type AppletUpdateDevice } from '../../data/simApplet';
+import { appletVersionInfo, toAppletUpdateDevice, type AppletUpdateDevice } from '../../data/simApplet';
+import { queryDevices, queryAllDevices, getTotalRecords, getAppletUpdateCount, UI_ROW_CAP } from '../../data/devices';
+import { useDataVersion } from '../../hooks/useDataVersion';
+import { downloadCsv } from '../../utils/csv';
 import { DefaultMappingContent } from '../DefaultMapping/DefaultMapping';
 import styles from './SimApplet.module.css';
+
+const PAGE_SIZE = 6;
 
 type IconProps = SVGProps<SVGSVGElement>;
 
@@ -42,28 +49,66 @@ const TABS: Array<TabBarItem<SimAppletTabId>> = [
 
 export function SimApplet() {
   const location = useLocation();
-  const navState = location.state as { tab?: SimAppletTabId } | null;
+  const navState = location.state as { tab?: SimAppletTabId; scrollTo?: string } | null;
   const [activeTab, setActiveTab] = useState<SimAppletTabId>(() => navState?.tab ?? 'overview');
-  const [devices, setDevices] = useState(devicesRequiringUpdate);
-  const [upToDate, setUpToDate] = useState(appletVersionInfo.upToDateCount);
-  const [updateAvailable, setUpdateAvailable] = useState(appletVersionInfo.updateAvailableCount);
+  const dataVersion = useDataVersion();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [completedIds, setCompletedIds] = useState<Set<string>>(() => new Set());
+  const [bulkCompletedCount, setBulkCompletedCount] = useState(0);
   const [modalDevice, setModalDevice] = useState<AppletUpdateDevice | null>(null);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const tableAnchorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (navState?.scrollTo === 'devices-requiring-update') {
+      tableAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const totalRecords = useMemo(() => getTotalRecords(), [dataVersion]);
+  const updateCount = useMemo(() => getAppletUpdateCount(), [dataVersion]);
+  const updateAvailable = Math.max(0, updateCount - completedIds.size - bulkCompletedCount);
+  const upToDate = totalRecords - updateAvailable;
+
+  // bulkCompletedCount devices were handled as an anonymous session batch (no individual
+  // deviceIds — see BulkUpdateModal), so they're skipped from the front of the matching set
+  // rather than looked up by id, the same way completedIds skips individually-updated ones.
+  const { total: queryTotal, rows: pageRows } = useMemo(
+    () => queryDevices({ appletAction: 'Update', page: currentPage, pageSize: PAGE_SIZE, maxTotal: UI_ROW_CAP, skip: bulkCompletedCount }),
+    [currentPage, dataVersion, bulkCompletedCount]
+  );
+  const devices = useMemo(
+    () => pageRows.filter((r) => !completedIds.has(r.deviceId)).map(toAppletUpdateDevice),
+    [pageRows, completedIds]
+  );
+  const paginationTotal = Math.max(0, queryTotal - bulkCompletedCount);
 
   const handleUpgradeComplete = () => {
     if (!modalDevice) return;
-    const deviceId = modalDevice.deviceId;
-    setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
-    setUpToDate((n) => n + 1);
-    setUpdateAvailable((n) => Math.max(0, n - 1));
+    setCompletedIds((prev) => new Set(prev).add(modalDevice.deviceId));
     setModalDevice(null);
   };
 
-  const handleBulkComplete = (updatedDeviceIds: string[]) => {
-    setDevices((prev) => prev.filter((d) => !updatedDeviceIds.includes(d.deviceId)));
-    setUpToDate((n) => n + updatedDeviceIds.length);
-    setUpdateAvailable((n) => Math.max(0, n - updatedDeviceIds.length));
+  const handleBulkComplete = (updatedCount: number) => {
+    setBulkCompletedCount((prev) => prev + updatedCount);
+    setCurrentPage(1);
     setBulkModalOpen(false);
+  };
+
+  const handleExport = () => {
+    setExporting(true);
+    setTimeout(() => {
+      const { rows } = queryAllDevices({ appletAction: 'Update' });
+      const exportRows = rows.map(toAppletUpdateDevice);
+      downloadCsv(
+        'devices-requiring-applet-update.csv',
+        ['Meter', 'Device ID', 'Firmware', 'Current', 'Latest', 'Compatibility', 'Action'],
+        exportRows.map((d) => [d.meter, d.deviceId, d.firmware, d.current, d.latest, d.compatibility, d.action])
+      );
+      setExporting(false);
+    }, 0);
   };
 
   return (
@@ -140,17 +185,19 @@ export function SimApplet() {
             </div>
           </div>
 
-          <div className={styles.card}>
+          <div className={styles.card} id="devices-requiring-update" ref={tableAnchorRef}>
             <div className={styles.cardHeader}>
               <div className={styles.cardHeaderTextBlock}>
                 <h2 className={styles.cardTitle}>Devices Requiring Applet Update</h2>
-                <p className={styles.cardSubtitle}>Click Update to open the upgrade flow.</p>
+                <p className={styles.cardSubtitle}>
+                  {updateAvailable.toLocaleString()} devices need an update. Click Update to open the upgrade flow.
+                </p>
               </div>
               <button
                 type="button"
                 className={styles.bulkUpdateButton}
                 onClick={() => setBulkModalOpen(true)}
-                disabled={devices.length === 0}
+                disabled={updateAvailable === 0}
               >
                 <icons.layers className={styles.bulkUpdateIcon} />
                 Bulk Update
@@ -205,6 +252,10 @@ export function SimApplet() {
                 )}
               </tbody>
             </table>
+
+            <DatasetInfoBar onExport={handleExport} exporting={exporting} />
+
+            <Pagination currentPage={currentPage} totalItems={paginationTotal} pageSize={PAGE_SIZE} onPageChange={setCurrentPage} />
           </div>
 
           {modalDevice && (
@@ -216,7 +267,13 @@ export function SimApplet() {
           )}
 
           {bulkModalOpen && (
-            <BulkUpdateModal devices={devices} onCancel={() => setBulkModalOpen(false)} onComplete={handleBulkComplete} />
+            <BulkUpdateModal
+              totalEligible={updateAvailable}
+              previewDevices={devices}
+              targetVersion={appletVersionInfo.latestVersion}
+              onCancel={() => setBulkModalOpen(false)}
+              onComplete={handleBulkComplete}
+            />
           )}
         </>
       )}

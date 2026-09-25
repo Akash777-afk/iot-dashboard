@@ -116,3 +116,9 @@
   --accent-bg: rgba(220, 38, 38, 0.12);
   --glow-bg: rgba(220, 38, 38, 0.15);
 }
+
+.yellow {
+  --accent-color: var(--color-kpi-yellow);
+  --accent-bg: rgba(234, 179, 8, 0.14);
+  --glow-bg: rgba(234, 179, 8, 0.18);
+}

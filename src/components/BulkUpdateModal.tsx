@@ -1,40 +1,34 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { icons } from '../assets/icons';
 import { StatusBadge } from './StatusBadge';
 import type { AppletUpdateDevice } from '../data/simApplet';
 import styles from './BulkUpdateModal.module.css';
 
 interface BulkUpdateModalProps {
-  devices: AppletUpdateDevice[];
+  totalEligible: number;
+  previewDevices: AppletUpdateDevice[];
+  targetVersion: string;
   onCancel: () => void;
-  onComplete: (updatedDeviceIds: string[]) => void;
+  /** Called with the number of devices actually processed this session (capped at SESSION_LIMIT). */
+  onComplete: (updatedCount: number) => void;
 }
 
 type Phase = 'select' | 'updating' | 'success';
 
-export function BulkUpdateModal({ devices, onCancel, onComplete }: BulkUpdateModalProps) {
-  const eligible = useMemo(() => devices.filter((d) => d.compatibility === 'Compatible'), [devices]);
-  const incompatible = useMemo(() => devices.filter((d) => d.compatibility !== 'Compatible'), [devices]);
+/** A bulk update operation can only push to this many devices in one session — a real
+    operational ceiling (rollout throughput, rollback blast radius), not a UI nicety. Eligible
+    devices beyond this stay eligible for the next session. */
+const SESSION_LIMIT = 1000;
 
-  const [selected, setSelected] = useState<Set<string>>(() => new Set(eligible.map((d) => d.deviceId)));
+export function BulkUpdateModal({ totalEligible, previewDevices, targetVersion, onCancel, onComplete }: BulkUpdateModalProps) {
+  const [allSelected, setAllSelected] = useState(true);
   const [phase, setPhase] = useState<Phase>('select');
   const [progress, setProgress] = useState(0);
 
-  const allSelected = eligible.length > 0 && selected.size === eligible.length;
-  const targetVersion = eligible[0]?.latest ?? '';
-
-  const toggleAll = () => {
-    setSelected(allSelected ? new Set() : new Set(eligible.map((d) => d.deviceId)));
-  };
-
-  const toggleOne = (deviceId: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(deviceId)) next.delete(deviceId);
-      else next.add(deviceId);
-      return next;
-    });
-  };
+  const sessionEligible = Math.min(totalEligible, SESSION_LIMIT);
+  const isCapped = totalEligible > SESSION_LIMIT;
+  const selectedCount = allSelected ? sessionEligible : 0;
+  const remainingAfterSession = Math.max(0, totalEligible - selectedCount);
 
   useEffect(() => {
     if (phase !== 'updating') return;
@@ -80,34 +74,39 @@ export function BulkUpdateModal({ devices, onCancel, onComplete }: BulkUpdateMod
 
             <div className={styles.summaryRow}>
               <div className={styles.summaryStat}>
-                <span className={styles.summaryValue}>{eligible.length}</span>
+                <span className={styles.summaryValue}>{totalEligible.toLocaleString()}</span>
                 <span className={styles.summaryLabel}>Eligible Devices</span>
               </div>
               <div className={styles.summaryStat}>
-                <span className={`${styles.summaryValue} ${incompatible.length > 0 ? styles.summaryValueWarn : ''}`}>
-                  {incompatible.length}
-                </span>
-                <span className={styles.summaryLabel}>Incompatible</span>
-              </div>
-              <div className={styles.summaryStat}>
-                <span className={styles.summaryValue}>{selected.size}</span>
+                <span className={styles.summaryValue}>{selectedCount.toLocaleString()}</span>
                 <span className={styles.summaryLabel}>Selected</span>
               </div>
             </div>
+
+            {isCapped && (
+              <p className={styles.sessionLimitNote}>
+                A maximum of {SESSION_LIMIT.toLocaleString()} devices can be updated per session. The remaining{' '}
+                {(totalEligible - sessionEligible).toLocaleString()} eligible devices will stay eligible for your next
+                session.
+              </p>
+            )}
+
+            <label className={styles.selectAllRow}>
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={() => setAllSelected((v) => !v)}
+                disabled={closeDisabled}
+              />
+              {isCapped
+                ? `Select ${sessionEligible.toLocaleString()} devices for this session`
+                : `Select all ${sessionEligible.toLocaleString()} eligible devices`}
+            </label>
 
             <div className={styles.tableScroll}>
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th className={styles.checkboxCell}>
-                      <input
-                        type="checkbox"
-                        checked={allSelected}
-                        onChange={toggleAll}
-                        disabled={closeDisabled || eligible.length === 0}
-                        aria-label="Select all eligible devices"
-                      />
-                    </th>
                     <th>Device</th>
                     <th>Current</th>
                     <th>Target</th>
@@ -115,17 +114,8 @@ export function BulkUpdateModal({ devices, onCancel, onComplete }: BulkUpdateMod
                   </tr>
                 </thead>
                 <tbody>
-                  {eligible.map((d) => (
+                  {previewDevices.map((d) => (
                     <tr key={d.deviceId} className={styles.row}>
-                      <td className={styles.checkboxCell}>
-                        <input
-                          type="checkbox"
-                          checked={selected.has(d.deviceId)}
-                          onChange={() => toggleOne(d.deviceId)}
-                          disabled={closeDisabled}
-                          aria-label={`Select ${d.deviceId}`}
-                        />
-                      </td>
                       <td className={styles.deviceCell}>{d.deviceId}</td>
                       <td>{d.current}</td>
                       <td>{d.latest}</td>
@@ -134,22 +124,9 @@ export function BulkUpdateModal({ devices, onCancel, onComplete }: BulkUpdateMod
                       </td>
                     </tr>
                   ))}
-                  {incompatible.map((d) => (
-                    <tr key={d.deviceId} className={`${styles.row} ${styles.rowDisabled}`}>
-                      <td className={styles.checkboxCell}>
-                        <input type="checkbox" checked={false} disabled aria-label={`${d.deviceId} not eligible`} />
-                      </td>
-                      <td className={styles.deviceCell}>{d.deviceId}</td>
-                      <td>{d.current}</td>
-                      <td>{d.latest}</td>
-                      <td>
-                        <StatusBadge label="Check Firmware" tone="amber" />
-                      </td>
-                    </tr>
-                  ))}
-                  {eligible.length === 0 && incompatible.length === 0 && (
+                  {previewDevices.length === 0 && (
                     <tr>
-                      <td colSpan={5} className={styles.emptyState}>
+                      <td colSpan={4} className={styles.emptyState}>
                         No devices require an applet update.
                       </td>
                     </tr>
@@ -158,10 +135,18 @@ export function BulkUpdateModal({ devices, onCancel, onComplete }: BulkUpdateMod
               </table>
             </div>
 
+            {sessionEligible > previewDevices.length && (
+              <p className={styles.previewNote}>
+                Showing a preview of {previewDevices.length} of {sessionEligible.toLocaleString()} devices selected
+                for this session{isCapped ? ` (${totalEligible.toLocaleString()} eligible in total)` : ''}.
+              </p>
+            )}
+
             {phase === 'updating' && (
               <div className={styles.progressBlock}>
                 <p className={styles.progressLabel}>
-                  Updating {selected.size} device{selected.size === 1 ? '' : 's'}&hellip; {Math.round(progress)}%
+                  Updating {selectedCount.toLocaleString()} device{selectedCount === 1 ? '' : 's'}&hellip;{' '}
+                  {Math.round(progress)}%
                 </p>
                 <div className={styles.progressTrack}>
                   <div className={styles.progressFill} style={{ width: `${progress}%` }} />
@@ -177,9 +162,9 @@ export function BulkUpdateModal({ devices, onCancel, onComplete }: BulkUpdateMod
                 type="button"
                 className={styles.primaryButton}
                 onClick={() => setPhase('updating')}
-                disabled={selected.size === 0 || closeDisabled}
+                disabled={selectedCount === 0 || closeDisabled}
               >
-                {phase === 'updating' ? 'Updating…' : 'Start Bulk Update'}
+                {phase === 'updating' ? 'Updating…' : `Start Bulk Update (${selectedCount.toLocaleString()})`}
               </button>
             </div>
           </>
@@ -192,13 +177,15 @@ export function BulkUpdateModal({ devices, onCancel, onComplete }: BulkUpdateMod
             </span>
             <h3 className={styles.successTitle}>Bulk Update Complete</h3>
             <p className={styles.successText}>
-              {selected.size} device{selected.size === 1 ? '' : 's'} updated to {targetVersion}.
+              {selectedCount.toLocaleString()} device{selectedCount === 1 ? '' : 's'} updated to {targetVersion}.
             </p>
-            <button
-              type="button"
-              className={styles.primaryButton}
-              onClick={() => onComplete(Array.from(selected))}
-            >
+            {remainingAfterSession > 0 && (
+              <p className={styles.successRemaining}>
+                {remainingAfterSession.toLocaleString()} eligible device{remainingAfterSession === 1 ? '' : 's'}{' '}
+                remain — start a new session to continue.
+              </p>
+            )}
+            <button type="button" className={styles.primaryButton} onClick={() => onComplete(selectedCount)}>
               Done
             </button>
           </div>

@@ -29,6 +29,7 @@ import {
   IconBuilding,
   IconInfo,
   IconDownload,
+  IconRefresh,
 } from './svgIcons';
 import tierOneLogo from './source/t1.png';
 
@@ -59,6 +60,7 @@ export const icons = {
   building: IconBuilding,
   info: IconInfo,
   download: IconDownload,
+  refresh: IconRefresh,
 };
 
 export { tierOneLogo };

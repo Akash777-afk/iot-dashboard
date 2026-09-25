@@ -4,7 +4,15 @@ import { DatasetInfoBar } from './DatasetInfoBar';
 import { Pagination } from './Pagination';
 import { icons } from '../assets/icons';
 import { downloadCsv } from '../utils/csv';
-import { queryIssueTickets, queryAllIssueTickets, getIssueTicketSummary, type IssueCategory } from '../data/devices';
+import {
+  queryIssueTickets,
+  queryAllIssueTickets,
+  getIssueTicketSummary,
+  type IssueCategory,
+  type TicketSeverity,
+  type TicketStatus,
+} from '../data/devices';
+import { useDataVersion } from '../hooks/useDataVersion';
 import { ISSUE_SEVERITY_TONE, ISSUE_STATUS_TONE } from '../data/analytics';
 import styles from './IssueTicketModal.module.css';
 
@@ -26,13 +34,14 @@ interface IssueTicketModalProps {
 export function IssueTicketModal({ category, onClose }: IssueTicketModalProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [exporting, setExporting] = useState(false);
+  const dataVersion = useDataVersion();
 
   const { total, rows } = useMemo(
     () => queryIssueTickets({ issueCategory: category, page: currentPage, pageSize: PAGE_SIZE }),
-    [category, currentPage]
+    [category, currentPage, dataVersion]
   );
 
-  const summary = useMemo(() => getIssueTicketSummary(category), [category]);
+  const summary = useMemo(() => getIssueTicketSummary(category), [category, dataVersion]);
 
   const metrics: Array<{ label: string; value: string | number; tone: 'red' | 'blue' | 'purple' }> = [
     { label: 'Affected Devices', value: summary.totalIssues.toLocaleString(), tone: 'red' },
@@ -48,7 +57,17 @@ export function IssueTicketModal({ category, onClose }: IssueTicketModalProps) {
       downloadCsv(
         filename,
         ['BTS', 'Location', 'Problem', 'Severity', 'Affected Meters', 'SINR', 'Transport', 'Customer', 'Status'],
-        allRows.map((t) => [t.bts, t.location, t.problem, t.severity, String(t.affectedMeters), `${t.sinr} dB`, t.transport, t.customer, t.status])
+        allRows.map((t) => [
+          t.bts,
+          t.location,
+          t.problem,
+          t.severity,
+          String(t.affectedMeters ?? ''),
+          t.sinr !== null ? `${t.sinr} dB` : '',
+          t.transport,
+          t.customer,
+          t.ticketStatus,
+        ])
       );
       setExporting(false);
     }, 0);
@@ -106,14 +125,20 @@ export function IssueTicketModal({ category, onClose }: IssueTicketModalProps) {
                   <td>{t.location}</td>
                   <td>{t.problem}</td>
                   <td>
-                    <StatusBadge label={t.severity} tone={ISSUE_SEVERITY_TONE[t.severity]} />
+                    <StatusBadge
+                      label={t.severity}
+                      tone={ISSUE_SEVERITY_TONE[t.severity as TicketSeverity]}
+                    />
                   </td>
-                  <td>{t.affectedMeters}</td>
-                  <td>{t.sinr.toFixed(1)} dB</td>
+                  <td>{t.affectedMeters ?? '—'}</td>
+                  <td>{t.sinr !== null ? `${t.sinr.toFixed(1)} dB` : '—'}</td>
                   <td>{t.transport}</td>
                   <td>{t.customer}</td>
                   <td>
-                    <StatusBadge label={t.status} tone={ISSUE_STATUS_TONE[t.status]} />
+                    <StatusBadge
+                      label={t.ticketStatus}
+                      tone={ISSUE_STATUS_TONE[t.ticketStatus as TicketStatus]}
+                    />
                   </td>
                 </tr>
               ))}

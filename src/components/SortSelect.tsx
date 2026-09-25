@@ -8,9 +8,12 @@ interface SortSelectProps {
   options: string[];
   onChange: (value: string | null) => void;
   icon?: ComponentType<SVGProps<SVGSVGElement>>;
+  /** Optional display-label formatter — the underlying value passed to onChange/matched against `value` is always the raw option string; this only changes what's rendered. */
+  getOptionLabel?: (option: string) => string;
 }
 
-export function SortSelect({ placeholder, value, options, onChange, icon: Icon }: SortSelectProps) {
+export function SortSelect({ placeholder, value, options, onChange, icon: Icon, getOptionLabel }: SortSelectProps) {
+  const formatLabel = getOptionLabel ?? ((o: string) => o);
   const [open, setOpen] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(() => Math.max(0, value ? options.indexOf(value) : 0));
   const menuRef = useRef<HTMLUListElement>(null);
@@ -69,7 +72,7 @@ export function SortSelect({ placeholder, value, options, onChange, icon: Icon }
         aria-label={placeholder}
       >
         {Icon && <Icon className={styles.icon} />}
-        <span className={styles.text}>{value ?? placeholder}</span>
+        <span className={styles.text}>{value ? formatLabel(value) : placeholder}</span>
       </button>
 
       {value && (
@@ -103,7 +106,7 @@ export function SortSelect({ placeholder, value, options, onChange, icon: Icon }
                   onClick={() => commit(opt)}
                   onMouseEnter={() => setHighlightIndex(i)}
                 >
-                  {opt}
+                  {formatLabel(opt)}
                 </button>
               </li>
             ))}

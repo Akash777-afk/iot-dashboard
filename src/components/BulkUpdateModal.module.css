@@ -12,12 +12,12 @@
 .modal {
   width: 100%;
   max-width: 560px;
-  max-height: calc(100vh - 60px);
+  max-height: calc(100vh - 32px);
   overflow-y: auto;
   background: var(--color-white);
   border-radius: var(--radius-container);
   box-shadow: var(--shadow-container);
-  padding: 21px;
+  padding: 18px 21px;
 }
 
 .header {
@@ -25,7 +25,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .headerTextBlock {
@@ -70,15 +70,43 @@
 
 .summaryRow {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+}
+
+.sessionLimitNote {
+  margin: 0 0 10px;
+  padding: 7.5px 10.5px;
+  border-radius: var(--radius-control);
+  background: var(--color-status-amber-bg);
+  color: var(--color-status-amber);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.selectAllRow {
+  display: flex;
+  align-items: center;
+  gap: 7.5px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 9px;
+  cursor: pointer;
+}
+
+.previewNote {
+  margin: 0 0 10px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }
 
 .summaryStat {
   background: var(--color-surface-subtle);
   border-radius: var(--radius-control);
-  padding: 9px 10.5px;
+  padding: 7px 10.5px;
   text-align: center;
 }
 
@@ -90,10 +118,6 @@
   line-height: 1.2;
 }
 
-.summaryValueWarn {
-  color: var(--color-status-amber);
-}
-
 .summaryLabel {
   display: block;
   font-size: var(--font-size-sm);
@@ -103,11 +127,10 @@
 
 .tableScroll {
   overflow-x: auto;
-  overflow-y: auto;
-  max-height: 240px;
+  overflow-y: visible;
   border: 1px solid var(--color-divider);
   border-radius: var(--radius-control);
-  margin-bottom: 15px;
+  margin-bottom: 9px;
 }
 
 .table {
@@ -142,14 +165,6 @@
 
 .row:last-child td {
   border-bottom: none;
-}
-
-.rowDisabled {
-  opacity: 0.55;
-}
-
-.checkboxCell {
-  width: 34px;
 }
 
 .deviceCell {
@@ -256,9 +271,16 @@
 }
 
 .successText {
-  margin: 0 0 18px;
+  margin: 0 0 6px;
   font-size: var(--font-size-base);
   color: var(--color-text-secondary);
+}
+
+.successRemaining {
+  margin: 0 0 18px;
+  font-size: var(--font-size-sm);
+  color: var(--color-status-amber);
+  font-weight: 600;
 }
 
 .successBlock .primaryButton {
@@ -267,7 +289,7 @@
 
 @media (max-width: 640px) {
   .summaryRow {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
   }
 }
