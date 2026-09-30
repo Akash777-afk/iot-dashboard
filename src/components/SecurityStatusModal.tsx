@@ -1,27 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
-import type { SecurityDetailStatus } from '../data/deviceDetail';
+import type { SecurityStatus } from '../data/devices';
 import styles from './SecurityStatusModal.module.css';
 
 interface SecurityStatusModalProps {
-  currentStatus: SecurityDetailStatus;
+  currentStatus: SecurityStatus;
   onCancel: () => void;
-  onConfirm: (status: SecurityDetailStatus) => void;
+  onConfirm: (status: SecurityStatus) => void;
 }
 
-const OPTIONS: Array<{ value: SecurityDetailStatus; label: string }> = [
+const OPTIONS: Array<{ value: SecurityStatus; label: string }> = [
   { value: 'Whitelisted', label: 'Whitelist' },
   { value: 'Blacklisted', label: 'Blacklist' },
-  { value: 'Suspended', label: 'Suspend' },
 ];
 
-const TONE_CLASS: Record<SecurityDetailStatus, string> = {
+const TONE_CLASS: Record<SecurityStatus, string> = {
   Whitelisted: styles.optionGreen,
   Blacklisted: styles.optionRed,
-  Suspended: styles.optionBlue,
 };
 
 export function SecurityStatusModal({ currentStatus, onCancel, onConfirm }: SecurityStatusModalProps) {
-  const [selected, setSelected] = useState<SecurityDetailStatus>(currentStatus);
+  const [selected, setSelected] = useState<SecurityStatus>(currentStatus);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {

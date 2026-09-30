@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import styles from './charts.module.css';
 import { StatusBadge } from '../StatusBadge';
-import type { FilteredSiteAggregate } from '../../data/devices';
+import { SEVERITY_TONE, type FilteredSiteAggregate } from '../../data/devices';
 
 /** Original design baseline (before the cards were forced to a shared fixed height): WIDTH=300,
     HEIGHT=144. WIDTH stays fixed at 300 (matches the sibling radial/polar charts' convention);
@@ -174,7 +174,7 @@ export function PolarSinrRiskChart({ sites, circleLabel, goodMinDb, poorMaxDb }:
           <div className={styles.tooltipRow}>Devices: <strong>{hovered.site.count.toLocaleString()}</strong></div>
           <div className={styles.tooltipRow}>SINR: <strong>{hovered.site.sinr.toFixed(1)} dB</strong></div>
           <div className={styles.tooltipRow}>
-            Issue: <StatusBadge label={hovered.site.problem} tone={hovered.site.severity === 'Critical' ? 'red' : 'amber'} />
+            Issue: <StatusBadge label={hovered.site.problem} tone={SEVERITY_TONE[hovered.site.severity]} />
           </div>
         </div>
       )}

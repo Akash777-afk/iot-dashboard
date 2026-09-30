@@ -1,5 +1,5 @@
 import { StatusBadge } from './StatusBadge';
-import type { FilteredSiteAggregate } from '../data/devices';
+import { SEVERITY_TONE, UI_ROW_CAP, type FilteredSiteAggregate } from '../data/devices';
 import { seededRange } from '../utils/seededRandom';
 import styles from './CardExpandModal.module.css';
 
@@ -55,14 +55,15 @@ function alertContent(site: FilteredSiteAggregate, circleLabel: (location: strin
  * never a fabricated alert feed.
  */
 export function AlertsListModal({ sites, circleLabel, onClose }: AlertsListModalProps) {
-  const rows = [...sites].sort((a, b) => {
+  const sorted = [...sites].sort((a, b) => {
     if (a.severity !== b.severity) return a.severity === 'Critical' ? -1 : 1;
     return a.sinr - b.sinr;
   });
+  const rows = sorted.slice(0, UI_ROW_CAP);
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div className={`${styles.modal} ${styles.modalNarrow}`} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <div>
             <h2 className={styles.title}>Alerts Under Threshold</h2>
@@ -87,12 +88,18 @@ export function AlertsListModal({ sites, circleLabel, onClose }: AlertsListModal
                     <p className={styles.alertMeta}>{meta}</p>
                   </div>
                   <span className={styles.alertBadge}>
-                    <StatusBadge label={site.severity} tone={site.severity === 'Critical' ? 'red' : 'amber'} />
+                    <StatusBadge label={site.severity} tone={SEVERITY_TONE[site.severity]} />
                   </span>
                 </li>
               );
             })}
           </ul>
+        )}
+
+        {sorted.length > UI_ROW_CAP && (
+          <p className={styles.footerNote}>
+            Showing the {UI_ROW_CAP} most severe alerts of {sorted.length.toLocaleString()} — narrow the filters above to see others.
+          </p>
         )}
       </div>
     </div>

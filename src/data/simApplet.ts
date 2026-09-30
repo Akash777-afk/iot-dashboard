@@ -1,4 +1,4 @@
-import type { MasterRecord } from './devices';
+import type { CustomerName, MasterRecord } from './devices';
 
 export const appletVersionInfo = {
   installedVersion: 'v2.1.0',
@@ -11,6 +11,7 @@ export type AppletUpdateAction = 'Update' | 'Check';
 export interface AppletUpdateDevice {
   meter: string;
   deviceId: string;
+  customer: CustomerName;
   firmware: string;
   current: string;
   latest: string;
@@ -27,6 +28,7 @@ export function toAppletUpdateDevice(record: MasterRecord): AppletUpdateDevice {
   return {
     meter: record.meter,
     deviceId: record.deviceId,
+    customer: record.customer,
     firmware: record.firmware,
     current: record.applet,
     latest: appletVersionInfo.latestVersion,

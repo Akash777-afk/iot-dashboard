@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react';
 import { StatusBadge } from './StatusBadge';
-import type { FilteredSiteAggregate } from '../data/devices';
+import { SEVERITY_TONE, UI_ROW_CAP, type FilteredSiteAggregate } from '../data/devices';
 import styles from './CardExpandModal.module.css';
 
 interface WorstDevicesModalProps {
@@ -16,7 +16,8 @@ interface WorstDevicesModalProps {
  * dataset has no per-device history — so that's stated plainly rather than implied.
  */
 export function WorstDevicesModal({ sites, icon: Icon, onClose }: WorstDevicesModalProps) {
-  const rows = [...sites].sort((a, b) => a.sinr - b.sinr);
+  const sorted = [...sites].sort((a, b) => a.sinr - b.sinr);
+  const rows = sorted.slice(0, UI_ROW_CAP);
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -51,9 +52,9 @@ export function WorstDevicesModal({ sites, icon: Icon, onClose }: WorstDevicesMo
                   <td className={styles.primaryCell}>{site.representativeDeviceId}</td>
                   <td>{site.code}</td>
                   <td>{site.sinr.toFixed(1)} dB</td>
-                  <td>{site.severity === 'Critical' ? 'Declining' : 'Stable'}</td>
+                  <td>{site.severity === 'Critical' || site.severity === 'Poor' ? 'Declining' : 'Stable'}</td>
                   <td>
-                    <StatusBadge label={site.severity} tone={site.severity === 'Critical' ? 'red' : 'amber'} />
+                    <StatusBadge label={site.severity} tone={SEVERITY_TONE[site.severity]} />
                   </td>
                 </tr>
               ))}
@@ -67,6 +68,12 @@ export function WorstDevicesModal({ sites, icon: Icon, onClose }: WorstDevicesMo
             </tbody>
           </table>
         </div>
+
+        {sorted.length > UI_ROW_CAP && (
+          <p className={styles.footerNote}>
+            Showing the {UI_ROW_CAP} worst devices of {sorted.length.toLocaleString()} — narrow the filters above to see others.
+          </p>
+        )}
 
         <p className={styles.footerNote}>
           Trend and Status reflect each device&rsquo;s current issue severity — the dataset has no time series to compute a real historical trajectory.

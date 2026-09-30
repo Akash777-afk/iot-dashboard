@@ -8,14 +8,48 @@ const PAD_RIGHT = 8;
 const PAD_TOP = 16;
 const PAD_BOTTOM = 24;
 
+/** Rounded-rect path with independent top/bottom corner radii. */
+function roundedBarPath(x: number, y: number, w: number, h: number, topRadius: number, bottomRadius: number): string {
+  const tr = Math.max(0, Math.min(topRadius, w / 2, h / 2));
+  const br = Math.max(0, Math.min(bottomRadius, w / 2, h / 2));
+  return [
+    `M ${x} ${y + tr}`,
+    tr ? `Q ${x} ${y} ${x + tr} ${y}` : `L ${x} ${y}`,
+    `L ${x + w - tr} ${y}`,
+    tr ? `Q ${x + w} ${y} ${x + w} ${y + tr}` : `L ${x + w} ${y}`,
+    `L ${x + w} ${y + h - br}`,
+    br ? `Q ${x + w} ${y + h} ${x + w - br} ${y + h}` : `L ${x + w} ${y + h}`,
+    `L ${x + br} ${y + h}`,
+    br ? `Q ${x} ${y + h} ${x} ${y + h - br}` : `L ${x} ${y + h}`,
+    'Z',
+  ].join(' ');
+}
+
 interface BarChartProps {
   data: number[];
   labels: string[];
   unit: string;
   color?: string;
+  /** Per-bar color override, by index — falls back to `color` for any index it doesn't cover. */
+  colors?: string[];
+  /** Corner radius for the bar's top edge (default 2). */
+  topRadius?: number;
+  /** Corner radius for the bar's bottom edge (default 2). */
+  bottomRadius?: number;
+  /** Whether to render the x-axis tick labels under each bar (default true). `labels` still drives tooltip text either way. */
+  showAxisLabels?: boolean;
 }
 
-export function BarChart({ data, labels, unit, color = '#2563EB' }: BarChartProps) {
+export function BarChart({
+  data,
+  labels,
+  unit,
+  color = '#2563EB',
+  colors,
+  topRadius = 2,
+  bottomRadius = 2,
+  showAxisLabels = true,
+}: BarChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const plotW = WIDTH - PAD_LEFT - PAD_RIGHT;
@@ -64,25 +98,22 @@ export function BarChart({ data, labels, unit, color = '#2563EB' }: BarChartProp
         ))}
 
         {bars.map((b, i) => (
-          <rect
+          <path
             key={i}
-            x={b.x}
-            y={b.y}
-            width={barWidth}
-            height={Math.max(2, b.height)}
-            rx={2}
-            fill={color}
+            d={roundedBarPath(b.x, b.y, barWidth, Math.max(2, b.height), topRadius, bottomRadius)}
+            fill={colors?.[i] ?? color}
             fillOpacity={hoverIndex === i ? 1 : 0.75}
           />
         ))}
 
-        {labels.map((label, i) =>
-          i % tickEvery === 0 ? (
-            <text key={i} x={PAD_LEFT + i * slot + slot / 2} y={HEIGHT - 6} className={styles.axisLabel} textAnchor="middle">
-              {label}
-            </text>
-          ) : null
-        )}
+        {showAxisLabels &&
+          labels.map((label, i) =>
+            i % tickEvery === 0 ? (
+              <text key={i} x={PAD_LEFT + i * slot + slot / 2} y={HEIGHT - 6} className={styles.axisLabel} textAnchor="middle">
+                {label}
+              </text>
+            ) : null
+          )}
       </svg>
 
       {hovered && hoverIndex !== null && (

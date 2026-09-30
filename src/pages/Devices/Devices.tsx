@@ -14,7 +14,6 @@ import { useDataVersion } from '../../hooks/useDataVersion';
 import {
   queryDevices,
   queryAllDevices,
-  SECURITY_TONE,
   DEVICE_STATUS_TONE,
   DEVICE_TYPES,
   LOCATIONS,
@@ -24,6 +23,7 @@ import {
   type LocationName,
   type CustomerName,
   type DeviceStatus,
+  type SecurityStatus,
 } from '../../data/devices';
 import { downloadCsv } from '../../utils/csv';
 import { OnboardingContent } from '../Onboarding/Onboarding';
@@ -89,7 +89,7 @@ const deviceTypeOptions: DeviceTypeName[] = [...DEVICE_TYPES];
 const locationOptions: LocationName[] = [...LOCATIONS];
 const customerOptions: CustomerName[] = [...CUSTOMERS];
 
-const PAGE_SIZE = 20_000; // 1,000,000 records / 50 pages
+const PAGE_SIZE = 20_000;
 const ROW_HEIGHT = 44;
 
 type DevicesTabId = 'onboarding' | 'security';
@@ -102,7 +102,11 @@ const TABS: Array<TabBarItem<DevicesTabId>> = [
 export function Devices() {
   const navigate = useNavigate();
   const location = useLocation();
-  const navState = location.state as { tab?: DevicesTabId; statusFilter?: DeviceStatus } | null;
+  const navState = location.state as {
+    tab?: DevicesTabId;
+    statusFilter?: DeviceStatus;
+    securityFilter?: SecurityStatus;
+  } | null;
   const [activeTab, setActiveTab] = useState<DevicesTabId>(() => navState?.tab ?? 'onboarding');
 
   const [search, setSearch] = useState('');
@@ -110,9 +114,10 @@ export function Devices() {
   const [deviceTypeFilter, setDeviceTypeFilter] = useState<DeviceTypeName | null>(null);
   const [locationFilter, setLocationFilter] = useState<LocationName | null>(null);
   const [statusFilter, setStatusFilter] = useState<DeviceStatus | null>(() => navState?.statusFilter ?? null);
+  const [securityFilter, setSecurityFilter] = useState<SecurityStatus | null>(() => navState?.securityFilter ?? null);
   const [currentPage, setCurrentPage] = useState(1);
   const [exporting, setExporting] = useState(false);
-  const hasFilter = Boolean(customerFilter || deviceTypeFilter || locationFilter || statusFilter);
+  const hasFilter = Boolean(customerFilter || deviceTypeFilter || locationFilter || statusFilter || securityFilter);
   const dataVersion = useDataVersion();
 
   const { total: totalMatches, rows: pageDevices } = useMemo(
@@ -124,22 +129,23 @@ export function Devices() {
             deviceType: deviceTypeFilter,
             location: locationFilter,
             status: statusFilter,
+            security: securityFilter,
             page: currentPage,
             pageSize: PAGE_SIZE,
             maxTotal: UI_ROW_CAP,
           })
         : { total: 0, rows: [] },
-    [hasFilter, search, customerFilter, deviceTypeFilter, locationFilter, statusFilter, currentPage, dataVersion]
+    [hasFilter, search, customerFilter, deviceTypeFilter, locationFilter, statusFilter, securityFilter, currentPage, dataVersion]
   );
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, customerFilter, deviceTypeFilter, locationFilter, statusFilter]);
+  }, [search, customerFilter, deviceTypeFilter, locationFilter, statusFilter, securityFilter]);
 
   const { containerRef, onScroll, startIndex, endIndex, topSpacerHeight, bottomSpacerHeight } = useVirtualRows({
     count: pageDevices.length,
     rowHeight: ROW_HEIGHT,
-    resetKey: `${search}-${customerFilter}-${deviceTypeFilter}-${locationFilter}-${statusFilter}-${currentPage}`,
+    resetKey: `${search}-${customerFilter}-${deviceTypeFilter}-${locationFilter}-${statusFilter}-${securityFilter}-${currentPage}`,
   });
   const visibleDevices = pageDevices.slice(startIndex, endIndex);
 
@@ -149,8 +155,8 @@ export function Devices() {
       const { rows } = queryAllDevices({});
       downloadCsv(
         'devices-export.csv',
-        ['IoT Devices', 'Device ID', 'Device Type', 'Customer', 'Location', 'Firmware', 'Applet', 'Status', 'Security'],
-        rows.map((d) => [d.meter, d.deviceId, d.deviceType, d.customer, d.location, d.firmware, d.applet, d.status, d.security])
+        ['IoT Devices', 'Device ID', 'Customer', 'Location', 'Firmware', 'Status'],
+        rows.map((d) => [d.meter, d.deviceId, d.customer, d.location, d.firmware, d.status])
       );
       setExporting(false);
     }, 0);
@@ -196,38 +202,46 @@ export function Devices() {
           </div>
         )}
 
+        {securityFilter && (
+          <div className={styles.statusChip}>
+            Security: {securityFilter}
+            <button
+              type="button"
+              className={styles.statusChipClear}
+              onClick={() => setSecurityFilter(null)}
+              aria-label="Clear security filter"
+            >
+              &times;
+            </button>
+          </div>
+        )}
+
         {hasFilter ? (
           <>
             <div className={styles.tableScroll} ref={containerRef} onScroll={onScroll}>
               <table className={styles.table}>
                 <colgroup>
-                  <col style={{ width: '11%' }} />
-                  <col style={{ width: '10%' }} />
-                  <col style={{ width: '12%' }} />
-                  <col style={{ width: '13%' }} />
+                  <col style={{ width: '16%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '18%' }} />
+                  <col style={{ width: '20%' }} />
                   <col style={{ width: '15%' }} />
-                  <col style={{ width: '10%' }} />
-                  <col style={{ width: '8%' }} />
-                  <col style={{ width: '10%' }} />
-                  <col style={{ width: '11%' }} />
+                  <col style={{ width: '17%' }} />
                 </colgroup>
                 <thead>
                   <tr>
                     <th>IoT Devices</th>
                     <th>Device ID</th>
-                    <th>Device Type</th>
                     <th>Customer</th>
                     <th>Location</th>
                     <th>Firmware</th>
-                    <th>Applet</th>
                     <th>Status</th>
-                    <th>Security</th>
                   </tr>
                 </thead>
                 <tbody>
                   {topSpacerHeight > 0 && (
                     <tr aria-hidden="true" style={{ height: topSpacerHeight }}>
-                      <td colSpan={9} style={{ padding: 0, border: 'none' }} />
+                      <td colSpan={6} style={{ padding: 0, border: 'none' }} />
                     </tr>
                   )}
                   {visibleDevices.map((d) => (
@@ -238,27 +252,22 @@ export function Devices() {
                     >
                       <td className={styles.meterCell}>{d.meter}</td>
                       <td>{d.deviceId}</td>
-                      <td>{d.deviceType}</td>
                       <td>{d.customer}</td>
                       <td>{d.location}</td>
                       <td>{d.firmware}</td>
-                      <td>{d.applet}</td>
                       <td>
                         <StatusBadge label={d.status} tone={DEVICE_STATUS_TONE[d.status]} />
-                      </td>
-                      <td>
-                        <StatusBadge label={d.security} tone={SECURITY_TONE[d.security]} />
                       </td>
                     </tr>
                   ))}
                   {bottomSpacerHeight > 0 && (
                     <tr aria-hidden="true" style={{ height: bottomSpacerHeight }}>
-                      <td colSpan={9} style={{ padding: 0, border: 'none' }} />
+                      <td colSpan={6} style={{ padding: 0, border: 'none' }} />
                     </tr>
                   )}
                   {pageDevices.length === 0 && (
                     <tr>
-                      <td colSpan={9} className={styles.emptyState}>
+                      <td colSpan={6} className={styles.emptyState}>
                         No devices match the selected filters.
                       </td>
                     </tr>

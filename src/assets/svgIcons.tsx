@@ -69,8 +69,8 @@ export function IconShieldCheck(props: IconProps) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <g clipPath="url(#clip0_3_71)">
-        <path d="M8.98637 0.998474L15.9758 3.99394V8.98639C15.9758 12.9803 12.9803 15.9758 8.98637 16.9743C4.99241 15.9758 1.99695 12.9803 1.99695 8.98639V3.99394L8.98637 0.998474Z" stroke="white" strokeWidth="1.49773" strokeLinejoin="round"/>
-        <path d="M5.99091 8.98642L7.98788 10.9834L11.9818 6.98944" stroke="white" strokeWidth="1.49773" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M8.98637 0.998474L15.9758 3.99394V8.98639C15.9758 12.9803 12.9803 15.9758 8.98637 16.9743C4.99241 15.9758 1.99695 12.9803 1.99695 8.98639V3.99394L8.98637 0.998474Z" stroke="currentColor" strokeWidth="1.49773" strokeLinejoin="round"/>
+        <path d="M5.99091 8.98642L7.98788 10.9834L11.9818 6.98944" stroke="currentColor" strokeWidth="1.49773" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
       <defs>
         <clipPath id="clip0_3_71">

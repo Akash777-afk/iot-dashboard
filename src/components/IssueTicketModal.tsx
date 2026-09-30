@@ -8,12 +8,11 @@ import {
   queryIssueTickets,
   queryAllIssueTickets,
   getIssueTicketSummary,
+  SEVERITY_TONE,
+  DEVICE_STATUS_TONE,
   type IssueCategory,
-  type TicketSeverity,
-  type TicketStatus,
 } from '../data/devices';
 import { useDataVersion } from '../hooks/useDataVersion';
-import { ISSUE_SEVERITY_TONE, ISSUE_STATUS_TONE } from '../data/analytics';
 import styles from './IssueTicketModal.module.css';
 
 const COLUMN_LABELS = ['BTS', 'Location', 'Problem', 'Severity', 'Affected Meters', 'SINR', 'Transport', 'Customer', 'Status'];
@@ -66,7 +65,7 @@ export function IssueTicketModal({ category, onClose }: IssueTicketModalProps) {
           t.sinr !== null ? `${t.sinr} dB` : '',
           t.transport,
           t.customer,
-          t.ticketStatus,
+          t.status,
         ])
       );
       setExporting(false);
@@ -127,7 +126,7 @@ export function IssueTicketModal({ category, onClose }: IssueTicketModalProps) {
                   <td>
                     <StatusBadge
                       label={t.severity}
-                      tone={ISSUE_SEVERITY_TONE[t.severity as TicketSeverity]}
+                      tone={SEVERITY_TONE[t.severity || 'Excellent']}
                     />
                   </td>
                   <td>{t.affectedMeters ?? '—'}</td>
@@ -136,8 +135,8 @@ export function IssueTicketModal({ category, onClose }: IssueTicketModalProps) {
                   <td>{t.customer}</td>
                   <td>
                     <StatusBadge
-                      label={t.ticketStatus}
-                      tone={ISSUE_STATUS_TONE[t.ticketStatus as TicketStatus]}
+                      label={t.status}
+                      tone={DEVICE_STATUS_TONE[t.status]}
                     />
                   </td>
                 </tr>

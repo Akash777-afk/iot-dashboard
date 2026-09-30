@@ -75,15 +75,22 @@ export function SimApplet() {
   // bulkCompletedCount devices were handled as an anonymous session batch (no individual
   // deviceIds — see BulkUpdateModal), so they're skipped from the front of the matching set
   // rather than looked up by id, the same way completedIds skips individually-updated ones.
-  const { total: queryTotal, rows: pageRows } = useMemo(
+  const { rows: pageRows } = useMemo(
     () => queryDevices({ appletAction: 'Update', page: currentPage, pageSize: PAGE_SIZE, maxTotal: UI_ROW_CAP, skip: bulkCompletedCount }),
     [currentPage, dataVersion, bulkCompletedCount]
   );
+  // updateAvailable (not queryTotal) is the real remaining count — queryTotal is only ever
+  // "however far the capped scan got", which isn't meaningful as a displayed total once a skip
+  // is in play. Same UI_ROW_CAP ceiling as before, just measured from the true count.
+  const paginationTotal = Math.min(updateAvailable, UI_ROW_CAP);
+  // The query always fetches a full page's worth (it has to, to satisfy the skip), but the last
+  // page of the capped total may only "own" a few of those rows — trim to match what the
+  // pagination label actually promises, rather than rendering extra real-but-uncounted rows.
+  const rowsOwnedByThisPage = Math.max(0, Math.min(PAGE_SIZE, paginationTotal - (currentPage - 1) * PAGE_SIZE));
   const devices = useMemo(
-    () => pageRows.filter((r) => !completedIds.has(r.deviceId)).map(toAppletUpdateDevice),
-    [pageRows, completedIds]
+    () => pageRows.slice(0, rowsOwnedByThisPage).filter((r) => !completedIds.has(r.deviceId)).map(toAppletUpdateDevice),
+    [pageRows, completedIds, rowsOwnedByThisPage]
   );
-  const paginationTotal = Math.max(0, queryTotal - bulkCompletedCount);
 
   const handleUpgradeComplete = () => {
     if (!modalDevice) return;
@@ -104,8 +111,8 @@ export function SimApplet() {
       const exportRows = rows.map(toAppletUpdateDevice);
       downloadCsv(
         'devices-requiring-applet-update.csv',
-        ['Meter', 'Device ID', 'Firmware', 'Current', 'Latest', 'Compatibility', 'Action'],
-        exportRows.map((d) => [d.meter, d.deviceId, d.firmware, d.current, d.latest, d.compatibility, d.action])
+        ['IoT Devices', 'Device ID', 'Customer', 'Firmware', 'Compatibility', 'Action'],
+        exportRows.map((d) => [d.meter, d.deviceId, d.customer, d.firmware, d.compatibility, d.action])
       );
       setExporting(false);
     }, 0);
@@ -207,11 +214,10 @@ export function SimApplet() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Meter</th>
+                  <th>IoT Devices</th>
                   <th>Device ID</th>
+                  <th>Customer</th>
                   <th>Firmware</th>
-                  <th>Current</th>
-                  <th>Latest</th>
                   <th>Compatibility</th>
                   <th>Action</th>
                 </tr>
@@ -221,9 +227,8 @@ export function SimApplet() {
                   <tr key={d.deviceId} className={styles.row}>
                     <td className={styles.meterCell}>{d.meter}</td>
                     <td>{d.deviceId}</td>
+                    <td>{d.customer}</td>
                     <td>{d.firmware}</td>
-                    <td>{d.current}</td>
-                    <td>{d.latest}</td>
                     <td>
                       <StatusBadge
                         label={d.compatibility}
@@ -245,7 +250,7 @@ export function SimApplet() {
                 ))}
                 {devices.length === 0 && (
                   <tr>
-                    <td colSpan={7} className={styles.emptyState}>
+                    <td colSpan={6} className={styles.emptyState}>
                       All devices are up to date.
                     </td>
                   </tr>

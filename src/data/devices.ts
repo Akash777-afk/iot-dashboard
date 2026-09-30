@@ -114,17 +114,18 @@ export const SINR_THRESHOLDS = {
   poorMaxDb: 0,
 } as const;
 
-export type TicketSeverity = 'Critical' | 'Warning';
+/** 'Warning' is the synthetic generator's own tier; the real dataset uses the other five. */
+export type TicketSeverity = 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Critical' | 'Warning';
 export type TicketStatus = 'Open' | 'Investigating' | 'Monitoring' | 'Resolved';
 
-/** Exact required distribution across all 1,000,114 records (default dataset). */
+/** Distribution across all 100,114 records in the reduced real dataset — see docs/dataset-reduction-validation.md. */
 export const DEFAULT_ISSUE_CATEGORY_COUNTS: Record<IssueCategory, number> = {
-  Critical: 197_120,
-  'Devices at Risk': 286_366,
-  'Healthy Devices': 516_628,
+  Critical: 9_784,
+  'Devices at Risk': 28_347,
+  'Healthy Devices': 61_983,
 };
 
-export const DEFAULT_TOTAL_RECORDS = 1_000_114;
+export const DEFAULT_TOTAL_RECORDS = 100_114;
 
 /** Max rows any single UI table paginates through, regardless of how many match the active filters — the full set is always still available via Export. */
 export const UI_ROW_CAP = 100;
@@ -155,6 +156,9 @@ export interface MasterRecord {
   severity: TicketSeverity | ''; // M — Severity (blank if none)
   affectedMeters: number | null; // N — Affected Meters (null if none)
   sinr: number | null; // O — SINR (null if none)
+  rsrp: number | null; // RSRP (dBm), null if not available
+  rssi: number | null; // RSSI (dBm), null if not available
+  rsrq: number | null; // RSRQ (dB), null if not available
   transport: string; // P — Transport (blank if none)
   ticketStatus: TicketStatus | ''; // Q — Status (ticket-level, separate from H)
   appletAction: AppletAction; // R — Action (Applet update required or just a routine check)
@@ -407,6 +411,9 @@ function invalidateCaches(): void {
   cachedUploadedCategoryCounts = null;
   cachedUploadedOutOfReachCount = null;
   cachedUploadedAppletUpdateCount = null;
+  cachedUploadedStatusCounts = null;
+  cachedUploadedTypeCounts = null;
+  deviceByIdCache = null;
 }
 
 type Listener = () => void;
@@ -507,6 +514,72 @@ export function getSecurityBlacklistedCount(): number {
   }
   securityBlacklistedCountCache = count;
   return count;
+}
+
+let cachedUploadedStatusCounts: Record<DeviceStatus, number> | null = null;
+
+function emptyStatusCounts(): Record<DeviceStatus, number> {
+  return { Active: 0, Degraded: 0, 'Update Available': 0, Blacklisted: 0, 'Out of Reach': 0 };
+}
+
+/** Live Status (H) counts for whichever dataset is currently active — powers the Dashboard's Device Status Distribution module. */
+export function getDeviceStatusCounts(): Record<DeviceStatus, number> {
+  if (uploadedRecords) {
+    if (!cachedUploadedStatusCounts) {
+      const counts = emptyStatusCounts();
+      for (const r of uploadedRecords) counts[r.status]++;
+      cachedUploadedStatusCounts = counts;
+    }
+    return cachedUploadedStatusCounts;
+  }
+  const counts = emptyStatusCounts();
+  for (let i = 0; i < totalRecords; i++) {
+    const base = i < BASE_DEVICES_RAW.length ? BASE_DEVICES_RAW[i] : null;
+    counts[getDeviceStatus(i, base)]++;
+  }
+  return counts;
+}
+
+let cachedUploadedTypeCounts: Record<DeviceTypeName, number> | null = null;
+
+function emptyTypeCounts(): Record<DeviceTypeName, number> {
+  return Object.fromEntries(DEVICE_TYPES.map((t) => [t, 0])) as Record<DeviceTypeName, number>;
+}
+
+/** Live Device Type counts for whichever dataset is currently active — powers the Dashboard's Device Type Distribution module. */
+export function getDeviceTypeCounts(): Record<DeviceTypeName, number> {
+  if (uploadedRecords) {
+    if (!cachedUploadedTypeCounts) {
+      const counts = emptyTypeCounts();
+      for (const r of uploadedRecords) counts[r.deviceType]++;
+      cachedUploadedTypeCounts = counts;
+    }
+    return cachedUploadedTypeCounts;
+  }
+  const counts = emptyTypeCounts();
+  for (let i = 0; i < totalRecords; i++) {
+    counts[classify(i).deviceType]++;
+  }
+  return counts;
+}
+
+let deviceByIdCache: Map<string, MasterRecord> | null = null;
+
+/** O(1) lookup of a single record by Device ID (column B) — powers the Device Detail page. */
+export function getDeviceById(deviceId: string): MasterRecord | undefined {
+  if (uploadedRecords) {
+    if (!deviceByIdCache) {
+      deviceByIdCache = new Map();
+      for (const r of uploadedRecords) deviceByIdCache.set(r.deviceId, r);
+    }
+    return deviceByIdCache.get(deviceId);
+  }
+  // Synthetic fallback: deviceId is always "DEV-<10001 + i>", so the index is derivable directly.
+  const match = /^DEV-(\d+)$/.exec(deviceId);
+  if (!match) return undefined;
+  const i = Number(match[1]) - 10001;
+  if (i < 0 || i >= totalRecords) return undefined;
+  return buildRecord(i);
 }
 
 /** Loads a parsed master dataset (e.g. from an uploaded Excel file) as the live data source. */
@@ -750,6 +823,9 @@ function buildRecord(i: number): MasterRecord {
     severity: ticket?.severity ?? ('' as const),
     affectedMeters: ticket?.affectedMeters ?? null,
     sinr: ticket?.sinr ?? null,
+    rsrp: null,
+    rssi: null,
+    rsrq: null,
     transport: ticket?.transport ?? '',
     ticketStatus: ticket?.status ?? ('' as const),
     appletAction: isAppletUpdate(i) ? 'Update' : 'Check',
@@ -774,6 +850,7 @@ export interface DeviceQueryParams {
   location?: LocationName | null;
   issueCategory?: IssueCategory | null;
   status?: DeviceStatus | null;
+  security?: SecurityStatus | null;
   appletAction?: AppletAction | null;
 }
 
@@ -783,6 +860,7 @@ function matchesRecord(record: MasterRecord, params: DeviceQueryParams): boolean
   if (params.location && extractCity(record.location) !== params.location) return false;
   if (params.issueCategory && record.issueCategory !== params.issueCategory) return false;
   if (params.status && record.status !== params.status) return false;
+  if (params.security && record.security !== params.security) return false;
   if (params.appletAction && record.appletAction !== params.appletAction) return false;
 
   const query = params.search?.trim().toLowerCase();
@@ -801,6 +879,7 @@ function matchesFilters(i: number, params: DeviceQueryParams): boolean {
       const base = i < BASE_DEVICES_RAW.length ? BASE_DEVICES_RAW[i] : null;
       if (getDeviceStatus(i, base) !== params.status) return false;
     }
+    if (params.security && getSecurity(i) !== params.security) return false;
     if (params.appletAction && (isAppletUpdate(i) ? 'Update' : 'Check') !== params.appletAction) return false;
 
     const query = params.search?.trim().toLowerCase();
@@ -825,11 +904,16 @@ export function queryDevices(
   params: DeviceQueryParams & { page: number; pageSize: number; maxTotal?: number; skip?: number }
 ): { total: number; rows: MasterRecord[] } {
   const n = getTotalRecords();
-  const cap = params.maxTotal ?? Infinity;
+  const skip = params.skip ?? 0;
+  const startIdx = skip + (params.page - 1) * params.pageSize;
+  const endIdx = startIdx + params.pageSize;
+  // maxTotal bounds how many matches we bother scanning for (a perf cap, not a real total) —
+  // but a skip must still be able to reach its own page window, or the scan gives up before
+  // it ever gets there and the page silently comes back empty. Only widen the cap when a skip
+  // is actually in play, so every skip=0 caller (Dashboard, Devices) is unaffected.
+  const cap = skip > 0 ? Math.max(params.maxTotal ?? Infinity, endIdx) : params.maxTotal ?? Infinity;
   const rows: MasterRecord[] = [];
   let total = 0;
-  const startIdx = (params.skip ?? 0) + (params.page - 1) * params.pageSize;
-  const endIdx = startIdx + params.pageSize;
 
   for (let i = 0; i < n && total < cap; i++) {
     if (matchesFilters(i, params)) {
@@ -1252,4 +1336,13 @@ export const DEVICE_STATUS_TONE: Record<DeviceStatus, BadgeTone> = {
   'Update Available': 'amber',
   Blacklisted: 'red',
   'Out of Reach': 'red',
+};
+
+export const SEVERITY_TONE: Record<TicketSeverity, BadgeTone> = {
+  Excellent: 'green',
+  Good: 'green',
+  Fair: 'blue',
+  Poor: 'amber',
+  Critical: 'red',
+  Warning: 'amber',
 };

@@ -18,7 +18,7 @@
   margin-bottom: 18px;
 }
 
-.tableContainer {
+.fleetOverviewContainer {
   background: var(--color-white);
   border-radius: var(--radius-container);
   box-shadow: var(--shadow-container);
@@ -57,11 +57,41 @@
   text-overflow: ellipsis;
 }
 
-.toolbarControls {
+.fleetMeta {
   display: flex;
   align-items: center;
-  gap: 7.5px;
+  gap: 9px;
   flex: 0 0 auto;
+}
+
+.fleetLastUpdated {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.cardActionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-divider);
+  background: var(--color-white);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.cardActionButton:hover {
+  background: var(--color-surface-subtle);
+  color: var(--color-text-primary);
+}
+
+.cardActionIcon {
+  width: 13.5px;
+  height: 13.5px;
 }
 
 @media (max-width: 640px) {
@@ -72,99 +102,235 @@
   .toolbarTitleBlock {
     flex-basis: 100%;
   }
+}
 
-  .toolbarControls {
-    flex-wrap: wrap;
+/* IoT Fleet Overview — 2x2 balanced grid, collapsing to a single column below 900px. */
+.fleetGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+@media (max-width: 900px) {
+  .fleetGrid {
+    grid-template-columns: 1fr;
   }
 }
 
-.viewAllButton {
-  display: inline-flex;
+.fleetCard {
+  background: var(--color-white);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-card);
+  padding: 15px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fleetCardTitle {
+  display: flex;
   align-items: center;
-  flex: 0 0 auto;
+  gap: 7.5px;
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.fleetCardIcon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  color: var(--color-primary-navy);
+}
+
+.fleetCardSubtitle {
+  margin: 4.5px 0 15px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Module 1 — Device Status Distribution */
+.statusChart {
+  margin-bottom: 9px;
+}
+
+/* Shared distribution legend — used by Device Status Distribution and Security Posture */
+.distributionLegend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 9px;
+}
+
+.distributionLegendItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4.5px;
+  flex: 1 1 0;
+  min-width: 88px;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.legendLabelRow {
+  display: flex;
+  align-items: center;
   gap: 6px;
-  border: none;
-  border-radius: var(--radius-pill);
-  padding: 6.75px 12px;
-  background: var(--color-primary-navy);
-  color: var(--color-white);
-  font-size: 10.5px;
+  min-width: 0;
+}
+
+.legendSwatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex: 0 0 9px;
+}
+
+.legendLabel {
+  min-width: 0;
   font-weight: 600;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.legendValue {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
   white-space: nowrap;
 }
 
-.viewAllIcon {
-  width: 9px;
-  height: 9px;
+/* Module 2 — Device Type Distribution */
+.barList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 19.5px;
 }
 
-.tableScroll {
-  overflow-x: auto;
-  overflow-y: auto;
-  max-height: 337px;
-  border-radius: 7.5px;
+.barListRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
 }
 
-.table {
-  width: 100%;
-  min-width: 820px;
-  table-layout: fixed;
-  border-collapse: collapse;
-}
-
-.table th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  text-align: left;
-  padding: 9px 12px;
-  background: var(--color-divider);
-  color: var(--color-text-table-header);
+.barListLabel {
+  flex: 0 0 132px;
   font-size: var(--font-size-sm);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.table th:first-child {
-  border-radius: 7.5px 0 0 7.5px;
-}
-
-.table th:last-child {
-  border-radius: 0 7.5px 7.5px 0;
-}
-
-.table td {
-  padding: 10.5px 12px;
-  font-size: var(--font-size-base);
   color: var(--color-text-primary);
-  border-bottom: 1px solid var(--color-divider);
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.meterCell {
+.barListTrack {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-divider);
+  overflow: hidden;
+}
+
+.barListFill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--color-chart-blue-mid);
+  transition: width 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.barListValue {
+  flex: 0 0 auto;
+  min-width: 84px;
+  text-align: right;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Module 3 — SIM Applet Operations */
+.progressGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 4.5px;
+}
+
+.progressRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progressLabelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 9px;
+}
+
+.progressLabel {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.progressValue {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.progressTrackRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.progressTrack {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-divider);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progressPercent {
+  flex: 0 0 auto;
+  min-width: 40px;
+  text-align: right;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
   font-weight: 600;
 }
 
-.row {
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.row:hover {
-  background: var(--color-divider);
-}
-
-.row:last-child td {
-  border-bottom: none;
-}
-
-.emptyState {
-  text-align: center;
-  color: var(--color-text-secondary);
-  padding: 24px 12px;
+/* Module 4 — Security Posture */
+.donutLayout {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  flex: 1 1 auto;
 }
 
 @media (max-width: 1150px) {

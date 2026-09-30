@@ -37,10 +37,11 @@
   --color-kpi-red: #dc2626;
   --color-kpi-yellow: #eab308;
 
-  /* Chart series colors — blue-only palette reserved for the Analytics health-category visualizations (Critical/At Risk/Healthy), which intentionally do not use the red/amber/green status palette */
+  /* Chart series colors — blue-only palette reserved for the Analytics health-category visualizations (Critical/At Risk/Healthy) and the Dashboard's IoT Fleet Overview, which intentionally do not use the red/amber/green status palette */
   --color-chart-blue-dark: #1e3a8a;
   --color-chart-blue-mid: #2563eb;
   --color-chart-blue-light: #93c5fd;
+  --color-chart-blue-lightest: #dbeafe;
 
   /* Radii (scaled 0.75x from the original desktop reference) */
   --radius-card: 12px;

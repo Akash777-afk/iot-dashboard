@@ -1,51 +1,68 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import type { SVGProps } from 'react';
 import { AppLayout } from '../../layout/AppLayout';
 import { KpiCard } from '../../components/KpiCard';
-import { StatusBadge } from '../../components/StatusBadge';
-import { SortSelect } from '../../components/SortSelect';
-import { Pagination } from '../../components/Pagination';
-import { FilterEmptyState } from '../../components/FilterEmptyState';
-import { DatasetInfoBar } from '../../components/DatasetInfoBar';
+import { DonutChart, type DonutChartSegment } from '../../components/charts/DonutChart';
+import { BarChart } from '../../components/charts/BarChart';
 import { icons } from '../../assets/icons';
 import { type KpiCardData } from '../../data/meters';
-import { useVirtualRows } from '../../hooks/useVirtualRows';
 import { useDataVersion } from '../../hooks/useDataVersion';
 import {
-  queryDevices,
-  queryAllDevices,
   getTotalRecords,
   getOutOfReachCount,
   getAppletUpdateCount,
   getSecurityBlacklistedCount,
-  DEVICE_STATUS_TONE,
+  getDeviceStatusCounts,
+  getDeviceTypeCounts,
   DEVICE_TYPES,
-  LOCATIONS,
-  CUSTOMERS,
-  UI_ROW_CAP,
-  type DeviceTypeName,
-  type LocationName,
-  type CustomerName,
+  type DeviceStatus,
 } from '../../data/devices';
-import { downloadCsv } from '../../utils/csv';
 import styles from './Dashboard.module.css';
 
-const deviceTypeOptions: DeviceTypeName[] = [...DEVICE_TYPES];
-const locationOptions: LocationName[] = [...LOCATIONS];
-const customerOptions: CustomerName[] = [...CUSTOMERS];
+// Mirrors the "SIM Applet rollout" KPI card's value above — rollout isn't yet tracked as its
+// own master-data column, so both places read this same constant rather than duplicating it.
+// 22% of the 100,114-device fleet.
+const SIM_APPLET_ROLLOUT_COUNT = 22_025;
 
-const PAGE_SIZE = 20_000; // 1,000,000 records / 50 pages
-const ROW_HEIGHT = 42;
+const DEVICE_STATUS_ORDER: DeviceStatus[] = ['Active', 'Degraded', 'Out of Reach', 'Blacklisted'];
+
+// Blue-only tonal ramp (darkest -> lightest) — no red/green/amber, per the Analytics palette convention.
+// Uses the chart-blue tokens (not --color-primary-navy, which reads as gray rather than blue).
+const DEVICE_STATUS_COLORS: Record<DeviceStatus, string> = {
+  Active: 'var(--color-chart-blue-dark)',
+  'Update Available': 'var(--color-chart-blue-dark)',
+  Degraded: 'var(--color-chart-blue-mid)',
+  'Out of Reach': 'var(--color-chart-blue-light)',
+  Blacklisted: 'var(--color-chart-blue-lightest)',
+};
+
+function formatPercent(value: number, total: number): string {
+  if (total <= 0) return '0.0%';
+  return `${((value / total) * 100).toFixed(1)}%`;
+}
+
+// Same shape as the shared upload icon, but stroked with currentColor so it picks up the
+// fleet card's dark-navy icon tone — the shared icons.upload is intentionally blue to match
+// the "SIM Applet rollout" KPI card's accent, so it can't be reused here directly.
+function UploadIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path
+        d="M8.9864 4.48639V10.4864M11.4864 6.28639L8.9864 4.48639L6.4864 6.28639"
+        stroke="currentColor"
+        strokeWidth="1.49773"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M1.99698 12.9803L3.49471 15.9758H14.4781L15.9758 12.9803" stroke="currentColor" strokeWidth="1.49773" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export function Dashboard() {
-  const [customerFilter, setCustomerFilter] = useState<CustomerName | null>(null);
-  const [deviceTypeFilter, setDeviceTypeFilter] = useState<DeviceTypeName | null>(null);
-  const [locationFilter, setLocationFilter] = useState<LocationName | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [exporting, setExporting] = useState(false);
-  const navigate = useNavigate();
-  const hasFilter = Boolean(customerFilter || deviceTypeFilter || locationFilter);
   const dataVersion = useDataVersion();
+  const [refreshTick, setRefreshTick] = useState(0);
+  const [lastUpdated, setLastUpdated] = useState(() => new Date());
 
   const allKpiCards: KpiCardData[] = useMemo(
     () => [
@@ -71,7 +88,7 @@ export function Dashboard() {
       {
         id: 'sim-applet-rollout',
         label: 'SIM Applet rollout',
-        value: '25,003',
+        value: SIM_APPLET_ROLLOUT_COUNT.toLocaleString(),
         actionLabel: 'view SIM Applet',
         accent: 'blue',
         icon: 'upload',
@@ -95,48 +112,50 @@ export function Dashboard() {
         accent: 'red',
         icon: 'blocked',
         to: '/devices',
+        toState: { securityFilter: 'Blacklisted' },
       },
     ],
     [dataVersion]
   );
 
-  const { total: totalMatches, rows: pageDevices } = useMemo(
-    () =>
-      hasFilter
-        ? queryDevices({
-            customer: customerFilter,
-            deviceType: deviceTypeFilter,
-            location: locationFilter,
-            page: currentPage,
-            pageSize: PAGE_SIZE,
-            maxTotal: UI_ROW_CAP,
-          })
-        : { total: 0, rows: [] },
-    [hasFilter, customerFilter, deviceTypeFilter, locationFilter, currentPage, dataVersion]
+  const fleetTotal = useMemo(() => getTotalRecords(), [dataVersion, refreshTick]);
+  const statusCounts = useMemo(() => getDeviceStatusCounts(), [dataVersion, refreshTick]);
+  const typeCounts = useMemo(() => getDeviceTypeCounts(), [dataVersion, refreshTick]);
+  const blacklistedCount = useMemo(() => getSecurityBlacklistedCount(), [dataVersion, refreshTick]);
+  const updateRequiredCount = useMemo(() => getAppletUpdateCount(), [dataVersion, refreshTick]);
+  const whitelistedCount = Math.max(0, fleetTotal - blacklistedCount);
+
+  const deviceTypeRows = useMemo(
+    () => DEVICE_TYPES.map((t) => ({ type: t, count: typeCounts[t] ?? 0 })).sort((a, b) => b.count - a.count),
+    [typeCounts]
+  );
+  const statusChartData = DEVICE_STATUS_ORDER.map((status) => statusCounts[status] ?? 0);
+  const statusChartLabels = [...DEVICE_STATUS_ORDER] as string[];
+  const statusChartColors = DEVICE_STATUS_ORDER.map((status) => DEVICE_STATUS_COLORS[status]);
+
+  const securitySegments: DonutChartSegment[] = [
+    {
+      label: 'Whitelisted',
+      value: whitelistedCount,
+      color: 'var(--color-primary-navy)',
+      detail: [`${whitelistedCount.toLocaleString()} devices`, formatPercent(whitelistedCount, fleetTotal)],
+    },
+    {
+      label: 'Blacklisted',
+      value: blacklistedCount,
+      color: 'var(--color-chart-blue-light)',
+      detail: [`${blacklistedCount.toLocaleString()} devices`, formatPercent(blacklistedCount, fleetTotal)],
+    },
+  ];
+
+  const lastUpdatedLabel = useMemo(
+    () => lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    [lastUpdated]
   );
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [customerFilter, deviceTypeFilter, locationFilter]);
-
-  const { containerRef, onScroll, startIndex, endIndex, topSpacerHeight, bottomSpacerHeight } = useVirtualRows({
-    count: pageDevices.length,
-    rowHeight: ROW_HEIGHT,
-    resetKey: `${customerFilter}-${deviceTypeFilter}-${locationFilter}-${currentPage}`,
-  });
-  const visibleDevices = pageDevices.slice(startIndex, endIndex);
-
-  const handleExport = () => {
-    setExporting(true);
-    setTimeout(() => {
-      const { rows } = queryAllDevices({});
-      downloadCsv(
-        'utility-meters-export.csv',
-        ['IoT Devices', 'Device ID', 'Device Type', 'Customer', 'Location', 'Firmware', 'Applet', 'Status', 'Issue Category'],
-        rows.map((d) => [d.meter, d.deviceId, d.deviceType, d.customer, d.location, d.firmware, d.applet, d.status, d.issueCategory])
-      );
-      setExporting(false);
-    }, 0);
+  const handleRefresh = () => {
+    setRefreshTick((n) => n + 1);
+    setLastUpdated(new Date());
   };
 
   return (
@@ -150,127 +169,154 @@ export function Dashboard() {
         ))}
       </div>
 
-      <div className={styles.tableContainer}>
+      <div className={styles.fleetOverviewContainer}>
         <div className={styles.toolbar}>
           <div className={styles.toolbarTitleBlock}>
-            <h2 className={styles.toolbarTitle}>Utility Meter Overview</h2>
-            <p className={styles.toolbarSubtitle}>Click any device row to open the Device Detail screen.</p>
+            <h2 className={styles.toolbarTitle}>IoT Fleet Overview</h2>
+            <p className={styles.toolbarSubtitle}>Current operational state and distribution of the IoT device fleet.</p>
           </div>
 
-          <div className={styles.toolbarControls}>
-            <SortSelect
-              placeholder="Select Customer"
-              value={customerFilter}
-              options={customerOptions}
-              onChange={(v) => setCustomerFilter(v as CustomerName | null)}
-              icon={icons.building}
-            />
-
-            <SortSelect
-              placeholder="Select Device Type"
-              value={deviceTypeFilter}
-              options={deviceTypeOptions}
-              onChange={(v) => setDeviceTypeFilter(v as DeviceTypeName | null)}
-              icon={icons.layers}
-            />
-
-            <SortSelect
-              placeholder="Select Location"
-              value={locationFilter}
-              options={locationOptions}
-              onChange={(v) => setLocationFilter(v as LocationName | null)}
-              icon={icons.mapPin}
-            />
-
-            <button
-              type="button"
-              className={styles.viewAllButton}
-              onClick={() => navigate('/devices')}
-            >
-              View All Devices
-              <icons.arrowRight className={styles.viewAllIcon} />
+          <div className={styles.fleetMeta}>
+            <span className={styles.fleetLastUpdated}>Last updated {lastUpdatedLabel}</span>
+            <button type="button" className={styles.cardActionButton} title="Refresh Data" aria-label="Refresh Data" onClick={handleRefresh}>
+              <icons.refresh className={styles.cardActionIcon} />
             </button>
           </div>
         </div>
 
-        {hasFilter ? (
-          <>
-            <div className={styles.tableScroll} ref={containerRef} onScroll={onScroll}>
-              <table className={styles.table}>
-                <colgroup>
-                  <col style={{ width: '13%' }} />
-                  <col style={{ width: '11%' }} />
-                  <col style={{ width: '14%' }} />
-                  <col style={{ width: '18%' }} />
-                  <col style={{ width: '16%' }} />
-                  <col style={{ width: '11%' }} />
-                  <col style={{ width: '7%' }} />
-                  <col style={{ width: '10%' }} />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>IoT Devices</th>
-                    <th>Device ID</th>
-                    <th>Device Type</th>
-                    <th>Customer</th>
-                    <th>Location</th>
-                    <th>Firmware</th>
-                    <th>Applet</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {topSpacerHeight > 0 && (
-                    <tr aria-hidden="true" style={{ height: topSpacerHeight }}>
-                      <td colSpan={8} style={{ padding: 0, border: 'none' }} />
-                    </tr>
-                  )}
-                  {visibleDevices.map((d) => (
-                    <tr
-                      key={d.deviceId}
-                      onClick={() => navigate(`/devices/${d.deviceId}`, { state: { from: 'dashboard' } })}
-                      className={styles.row}
-                    >
-                      <td className={styles.meterCell}>{d.meter}</td>
-                      <td>{d.deviceId}</td>
-                      <td>{d.deviceType}</td>
-                      <td>{d.customer}</td>
-                      <td>{d.location}</td>
-                      <td>{d.firmware}</td>
-                      <td>{d.applet}</td>
-                      <td>
-                        <StatusBadge label={d.status} tone={DEVICE_STATUS_TONE[d.status]} />
-                      </td>
-                    </tr>
-                  ))}
-                  {bottomSpacerHeight > 0 && (
-                    <tr aria-hidden="true" style={{ height: bottomSpacerHeight }}>
-                      <td colSpan={8} style={{ padding: 0, border: 'none' }} />
-                    </tr>
-                  )}
-                  {pageDevices.length === 0 && (
-                    <tr>
-                      <td colSpan={8} className={styles.emptyState}>
-                        No devices match the selected filters.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+        <div className={styles.fleetGrid}>
+          <div className={styles.fleetCard}>
+            <h3 className={styles.fleetCardTitle}>
+              <icons.deviceMonitor className={styles.fleetCardIcon} />
+              Device Status Distribution
+            </h3>
+            <p className={styles.fleetCardSubtitle}>Overall health status of {fleetTotal.toLocaleString()} IoT devices</p>
+
+            <div className={styles.statusChart}>
+              <BarChart
+                data={statusChartData}
+                labels={statusChartLabels}
+                unit=""
+                colors={statusChartColors}
+                topRadius={16}
+                bottomRadius={8}
+                showAxisLabels={false}
+              />
             </div>
 
-            <DatasetInfoBar onExport={handleExport} exporting={exporting} />
+            <ul className={styles.distributionLegend}>
+              {DEVICE_STATUS_ORDER.map((status) => {
+                const count = statusCounts[status] ?? 0;
+                return (
+                  <li key={status} className={styles.distributionLegendItem}>
+                    <span className={styles.legendLabelRow}>
+                      <span className={styles.legendSwatch} style={{ background: DEVICE_STATUS_COLORS[status] }} />
+                      <span className={styles.legendLabel}>{status}</span>
+                    </span>
+                    <span className={styles.legendValue}>
+                      {count.toLocaleString()} &middot; {formatPercent(count, fleetTotal)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
-            <Pagination
-              currentPage={currentPage}
-              totalItems={totalMatches}
-              pageSize={PAGE_SIZE}
-              onPageChange={setCurrentPage}
-            />
-          </>
-        ) : (
-          <FilterEmptyState />
-        )}
+          <div className={styles.fleetCard}>
+            <h3 className={styles.fleetCardTitle}>
+              <icons.layers className={styles.fleetCardIcon} />
+              Device Type Distribution
+            </h3>
+            <p className={styles.fleetCardSubtitle}>Distribution of {fleetTotal.toLocaleString()} IoT devices by type</p>
+
+            <ul className={styles.barList}>
+              {deviceTypeRows.map((row) => (
+                <li key={row.type} className={styles.barListRow}>
+                  <span className={styles.barListLabel}>{row.type}</span>
+                  <div className={styles.barListTrack}>
+                    <div
+                      className={styles.barListFill}
+                      style={{ width: `${(row.count / fleetTotal) * 100}%` }}
+                    />
+                  </div>
+                  <span className={styles.barListValue}>
+                    {row.count.toLocaleString()} &middot; {formatPercent(row.count, fleetTotal)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className={styles.fleetCard}>
+            <h3 className={styles.fleetCardTitle}>
+              <UploadIcon className={styles.fleetCardIcon} />
+              SIM Applet Operations
+            </h3>
+            <p className={styles.fleetCardSubtitle}>Deployment and update status across {fleetTotal.toLocaleString()} devices</p>
+
+            <div className={styles.progressGroup}>
+              <div className={styles.progressRow}>
+                <div className={styles.progressLabelRow}>
+                  <span className={styles.progressLabel}>Applet Rollout</span>
+                  <span className={styles.progressValue}>{SIM_APPLET_ROLLOUT_COUNT.toLocaleString()}</span>
+                </div>
+                <div className={styles.progressTrackRow}>
+                  <div className={styles.progressTrack}>
+                    <div
+                      className={styles.progressFill}
+                      style={{ width: `${(SIM_APPLET_ROLLOUT_COUNT / fleetTotal) * 100}%`, background: 'var(--color-chart-blue-dark)' }}
+                    />
+                  </div>
+                  <span className={styles.progressPercent}>{formatPercent(SIM_APPLET_ROLLOUT_COUNT, fleetTotal)}</span>
+                </div>
+              </div>
+
+              <div className={styles.progressRow}>
+                <div className={styles.progressLabelRow}>
+                  <span className={styles.progressLabel}>Update Required</span>
+                  <span className={styles.progressValue}>{updateRequiredCount.toLocaleString()}</span>
+                </div>
+                <div className={styles.progressTrackRow}>
+                  <div className={styles.progressTrack}>
+                    <div
+                      className={styles.progressFill}
+                      style={{ width: `${(updateRequiredCount / fleetTotal) * 100}%`, background: 'var(--color-chart-blue-mid)' }}
+                    />
+                  </div>
+                  <span className={styles.progressPercent}>{formatPercent(updateRequiredCount, fleetTotal)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.fleetCard}>
+            <h3 className={styles.fleetCardTitle}>
+              <icons.shieldCheck className={styles.fleetCardIcon} />
+              Security Posture
+            </h3>
+            <p className={styles.fleetCardSubtitle}>Whitelist vs blacklist status of IoT devices</p>
+
+            <div className={styles.donutLayout}>
+              <DonutChart
+                segments={securitySegments}
+                centerLabel={{ value: fleetTotal.toLocaleString(), caption: 'Devices' }}
+              />
+              <ul className={styles.distributionLegend}>
+                {securitySegments.map((seg) => (
+                  <li key={seg.label} className={styles.distributionLegendItem}>
+                    <span className={styles.legendLabelRow}>
+                      <span className={styles.legendSwatch} style={{ background: seg.color }} />
+                      <span className={styles.legendLabel}>{seg.label}</span>
+                    </span>
+                    <span className={styles.legendValue}>
+                      {seg.value.toLocaleString()} &middot; {formatPercent(seg.value, fleetTotal)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );

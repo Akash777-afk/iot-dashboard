@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react';
 import { StatusBadge } from './StatusBadge';
-import type { FilteredSiteAggregate } from '../data/devices';
+import { SEVERITY_TONE, UI_ROW_CAP, type FilteredSiteAggregate } from '../data/devices';
 import styles from './CardExpandModal.module.css';
 
 interface SiteListModalProps {
@@ -12,7 +12,8 @@ interface SiteListModalProps {
 
 /** Full-list expansion of Cell/Site Connectivity's polar chart — same filteredSites data, worst SINR first. */
 export function SiteListModal({ sites, circleLabel, icon: Icon, onClose }: SiteListModalProps) {
-  const rows = [...sites].sort((a, b) => a.sinr - b.sinr);
+  const sorted = [...sites].sort((a, b) => a.sinr - b.sinr);
+  const rows = sorted.slice(0, UI_ROW_CAP);
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -31,7 +32,14 @@ export function SiteListModal({ sites, circleLabel, icon: Icon, onClose }: SiteL
         </div>
 
         <div className={styles.tableScroll}>
-          <table className={styles.table}>
+          <table className={`${styles.table} ${styles.tableFixed}`}>
+            <colgroup>
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
+            </colgroup>
             <thead>
               <tr>
                 <th>Site</th>
@@ -44,7 +52,7 @@ export function SiteListModal({ sites, circleLabel, icon: Icon, onClose }: SiteL
             <tbody>
               {rows.map((site) => (
                 <tr key={site.code} className={styles.row}>
-                  <td>
+                  <td className={styles.wrapCell}>
                     <span className={styles.primaryCell}>{site.code}</span>
                     <span className={styles.subCell}>{site.locality}, {site.location}</span>
                   </td>
@@ -52,7 +60,7 @@ export function SiteListModal({ sites, circleLabel, icon: Icon, onClose }: SiteL
                   <td>{site.count.toLocaleString()}</td>
                   <td>{site.sinr.toFixed(1)} dB</td>
                   <td>
-                    <StatusBadge label={site.problem} tone={site.severity === 'Critical' ? 'red' : 'amber'} />
+                    <StatusBadge label={site.problem} tone={SEVERITY_TONE[site.severity]} />
                   </td>
                 </tr>
               ))}
@@ -66,6 +74,12 @@ export function SiteListModal({ sites, circleLabel, icon: Icon, onClose }: SiteL
             </tbody>
           </table>
         </div>
+
+        {sorted.length > UI_ROW_CAP && (
+          <p className={styles.footerNote}>
+            Showing the {UI_ROW_CAP} worst sites of {sorted.length.toLocaleString()} — narrow the filters above to see others.
+          </p>
+        )}
       </div>
     </div>
   );

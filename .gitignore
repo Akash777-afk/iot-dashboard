@@ -25,3 +25,12 @@ master-dataset-enhanced.xlsx
 *.njsproj
 *.sln
 *.sw?
+
+# Original 1,000,000-row source dataset (~193MB) — exceeds GitHub's 100MB limit and is superseded
+# by the reduced public/master-dataset-100114.csv the app actually loads. Stays local only;
+# regenerate via `tsx scripts/import-master-dataset.ts <source.xlsx>` if ever needed again.
+master-dataset.csv
+
+# Root-level copy is only a companion file for the standalone SIM-Applet-Operations.html
+# deliverable, not used by the Vite app — public/master-dataset-100114.csv is the one that ships.
+/master-dataset-100114.csv

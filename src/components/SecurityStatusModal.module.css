@@ -126,12 +126,6 @@
   color: var(--color-status-red);
 }
 
-.optionBlue {
-  border-color: var(--color-status-blue);
-  background: var(--color-status-blue-bg);
-  color: var(--color-status-blue);
-}
-
 .divider {
   height: 1px;
   background: var(--color-divider);

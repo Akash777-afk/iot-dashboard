@@ -20,6 +20,12 @@
   padding: 21px;
 }
 
+/* Narrower variant for list-style modals (e.g. Alerts Under Threshold) whose rows are just a
+   short text block + a badge — the full 760px table width leaves a large dead gap between them. */
+.modalNarrow {
+  max-width: 480px;
+}
+
 .header {
   display: flex;
   align-items: flex-start;
@@ -107,6 +113,22 @@
   white-space: nowrap;
 }
 
+/* Forces true equal-width columns (colgroup widths are otherwise just a suggestion under
+   auto layout) — paired with .wrapCell so the one long-text column wraps instead of
+   overflowing or forcing the column wider than its equal share. */
+.tableFixed {
+  table-layout: fixed;
+}
+
+.table td.wrapCell {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.wrapCell .subCell {
+  white-space: normal;
+}
+
 .row:hover {
   background: var(--color-surface-subtle);
 }
@@ -157,7 +179,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 13.5px 17px;
+  padding: 12px 17px;
   border-bottom: 1px solid var(--color-divider);
 }
 
@@ -177,13 +199,13 @@
 }
 
 .alertDescription {
-  margin: 3px 0 0;
+  margin: 1.5px 0 0;
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
 }
 
 .alertMeta {
-  margin: 3px 0 0;
+  margin: 1.5px 0 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
