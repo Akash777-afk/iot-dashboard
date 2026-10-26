@@ -38,6 +38,8 @@ interface BarChartProps {
   bottomRadius?: number;
   /** Whether to render the x-axis tick labels under each bar (default true). `labels` still drives tooltip text either way. */
   showAxisLabels?: boolean;
+  /** Fill opacity for non-hovered bars (default 0.75). Pass 1 when bars must render in their exact token color. */
+  fillOpacity?: number;
 }
 
 export function BarChart({
@@ -49,6 +51,7 @@ export function BarChart({
   topRadius = 2,
   bottomRadius = 2,
   showAxisLabels = true,
+  fillOpacity = 0.75,
 }: BarChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
@@ -102,7 +105,7 @@ export function BarChart({
             key={i}
             d={roundedBarPath(b.x, b.y, barWidth, Math.max(2, b.height), topRadius, bottomRadius)}
             fill={colors?.[i] ?? color}
-            fillOpacity={hoverIndex === i ? 1 : 0.75}
+            fillOpacity={hoverIndex === i ? 1 : fillOpacity}
           />
         ))}
 

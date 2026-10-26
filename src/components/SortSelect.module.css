@@ -34,6 +34,12 @@
   color: var(--color-text-secondary);
 }
 
+/* Some shared icons (e.g. layers) hard-code a stroke color instead of currentColor — force every
+   stroked shape to follow the color above so all filter icons match. */
+.icon [stroke]:not([stroke='none']) {
+  stroke: currentColor;
+}
+
 .text {
   font-size: 10.5px;
   font-weight: 600;

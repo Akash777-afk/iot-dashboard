@@ -42,6 +42,9 @@
   --color-chart-blue-mid: #2563eb;
   --color-chart-blue-light: #93c5fd;
   --color-chart-blue-lightest: #dbeafe;
+  /* Two evenly-spaced steps between --color-primary-navy (#102a54) and --color-chart-blue-light (#93c5fd) — the Device Status Distribution bars ramp across these so they line up with the Security Posture donut's two colors */
+  --color-chart-navy-step-1: #3c5e8c;
+  --color-chart-navy-step-2: #6791c5;
 
   /* Radii (scaled 0.75x from the original desktop reference) */
   --radius-card: 12px;

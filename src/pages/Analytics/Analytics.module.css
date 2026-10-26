@@ -348,7 +348,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 15px;
+  margin-bottom: 25px;
 }
 
 .aiTitleRow {
@@ -371,7 +371,7 @@
 
 .aiTitle {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: calc(var(--font-size-lg) + 2px);
   font-weight: 700;
   color: var(--color-white);
 }
@@ -385,22 +385,33 @@
 
 .aiSubtitle {
   margin: 4.5px 0 0;
-  font-size: var(--font-size-sm);
+  font-size: calc(var(--font-size-sm) + 2px);
   color: rgba(255, 255, 255, 0.7);
 }
 
-.aiBadge {
+.aiDashboardButton {
   flex: 0 0 auto;
   padding: 4.5px 10.5px;
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: var(--color-white);
-  font-size: var(--font-size-xs);
+  font-family: inherit;
+  font-size: calc(var(--font-size-xs) + 2px);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
   white-space: nowrap;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.aiDashboardButton:hover {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.aiDashboardButton:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
 }
 
 .aiSearchRow {
@@ -464,7 +475,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
-  margin-top: 12px;
+  margin-top: 22px;
 }
 
 .aiChip {
@@ -475,17 +486,15 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.12);
   color: var(--color-white);
-  font-size: var(--font-size-sm);
+  font-size: calc(var(--font-size-sm) + 2px);
   font-weight: 600;
   cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
 }
 
 .aiChip:hover {
-  background: rgba(255, 255, 255, 0.22);
-}
-
-.aiChip:hover {
-  background: var(--color-divider);
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.55);
 }
 
 @media (max-width: 1240px) {

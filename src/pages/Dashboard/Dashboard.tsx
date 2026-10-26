@@ -27,13 +27,14 @@ const SIM_APPLET_ROLLOUT_COUNT = 22_025;
 const DEVICE_STATUS_ORDER: DeviceStatus[] = ['Active', 'Degraded', 'Out of Reach', 'Blacklisted'];
 
 // Blue-only tonal ramp (darkest -> lightest) — no red/green/amber, per the Analytics palette convention.
-// Uses the chart-blue tokens (not --color-primary-navy, which reads as gray rather than blue).
+// Endpoints match the Security Posture donut (Whitelisted navy -> Blacklisted light blue), with two
+// evenly-spaced steps between them.
 const DEVICE_STATUS_COLORS: Record<DeviceStatus, string> = {
-  Active: 'var(--color-chart-blue-dark)',
-  'Update Available': 'var(--color-chart-blue-dark)',
-  Degraded: 'var(--color-chart-blue-mid)',
-  'Out of Reach': 'var(--color-chart-blue-light)',
-  Blacklisted: 'var(--color-chart-blue-lightest)',
+  Active: 'var(--color-primary-navy)',
+  'Update Available': 'var(--color-primary-navy)',
+  Degraded: 'var(--color-chart-navy-step-1)',
+  'Out of Reach': 'var(--color-chart-navy-step-2)',
+  Blacklisted: 'var(--color-chart-blue-light)',
 };
 
 function formatPercent(value: number, total: number): string {
@@ -187,39 +188,30 @@ export function Dashboard() {
         <div className={styles.fleetGrid}>
           <div className={styles.fleetCard}>
             <h3 className={styles.fleetCardTitle}>
-              <icons.deviceMonitor className={styles.fleetCardIcon} />
-              Device Status Distribution
+              <icons.shieldCheck className={styles.fleetCardIcon} />
+              Security Posture
             </h3>
-            <p className={styles.fleetCardSubtitle}>Overall health status of {fleetTotal.toLocaleString()} IoT devices</p>
+            <p className={styles.fleetCardSubtitle}>Whitelist vs blacklist status of IoT devices</p>
 
-            <div className={styles.statusChart}>
-              <BarChart
-                data={statusChartData}
-                labels={statusChartLabels}
-                unit=""
-                colors={statusChartColors}
-                topRadius={16}
-                bottomRadius={8}
-                showAxisLabels={false}
+            <div className={styles.donutLayout}>
+              <DonutChart
+                segments={securitySegments}
+                centerLabel={{ value: fleetTotal.toLocaleString(), caption: 'Devices' }}
               />
-            </div>
-
-            <ul className={styles.distributionLegend}>
-              {DEVICE_STATUS_ORDER.map((status) => {
-                const count = statusCounts[status] ?? 0;
-                return (
-                  <li key={status} className={styles.distributionLegendItem}>
+              <ul className={styles.distributionLegend}>
+                {securitySegments.map((seg) => (
+                  <li key={seg.label} className={styles.distributionLegendItem}>
                     <span className={styles.legendLabelRow}>
-                      <span className={styles.legendSwatch} style={{ background: DEVICE_STATUS_COLORS[status] }} />
-                      <span className={styles.legendLabel}>{status}</span>
+                      <span className={styles.legendSwatch} style={{ background: seg.color }} />
+                      <span className={styles.legendLabel}>{seg.label}</span>
                     </span>
                     <span className={styles.legendValue}>
-                      {count.toLocaleString()} &middot; {formatPercent(count, fleetTotal)}
+                      {seg.value.toLocaleString()} &middot; {formatPercent(seg.value, fleetTotal)}
                     </span>
                   </li>
-                );
-              })}
-            </ul>
+                ))}
+              </ul>
+            </div>
           </div>
 
           <div className={styles.fleetCard}>
@@ -280,7 +272,7 @@ export function Dashboard() {
                   <div className={styles.progressTrack}>
                     <div
                       className={styles.progressFill}
-                      style={{ width: `${(updateRequiredCount / fleetTotal) * 100}%`, background: 'var(--color-chart-blue-mid)' }}
+                      style={{ width: `${(updateRequiredCount / fleetTotal) * 100}%`, background: 'var(--color-chart-blue-light)' }}
                     />
                   </div>
                   <span className={styles.progressPercent}>{formatPercent(updateRequiredCount, fleetTotal)}</span>
@@ -291,30 +283,40 @@ export function Dashboard() {
 
           <div className={styles.fleetCard}>
             <h3 className={styles.fleetCardTitle}>
-              <icons.shieldCheck className={styles.fleetCardIcon} />
-              Security Posture
+              <icons.deviceMonitor className={styles.fleetCardIcon} />
+              Device Status Distribution
             </h3>
-            <p className={styles.fleetCardSubtitle}>Whitelist vs blacklist status of IoT devices</p>
+            <p className={styles.fleetCardSubtitle}>Overall health status of {fleetTotal.toLocaleString()} IoT devices</p>
 
-            <div className={styles.donutLayout}>
-              <DonutChart
-                segments={securitySegments}
-                centerLabel={{ value: fleetTotal.toLocaleString(), caption: 'Devices' }}
+            <div className={styles.statusChart}>
+              <BarChart
+                data={statusChartData}
+                labels={statusChartLabels}
+                unit=""
+                colors={statusChartColors}
+                fillOpacity={1}
+                topRadius={16}
+                bottomRadius={8}
+                showAxisLabels={false}
               />
-              <ul className={styles.distributionLegend}>
-                {securitySegments.map((seg) => (
-                  <li key={seg.label} className={styles.distributionLegendItem}>
+            </div>
+
+            <ul className={styles.distributionLegend}>
+              {DEVICE_STATUS_ORDER.map((status) => {
+                const count = statusCounts[status] ?? 0;
+                return (
+                  <li key={status} className={styles.distributionLegendItem}>
                     <span className={styles.legendLabelRow}>
-                      <span className={styles.legendSwatch} style={{ background: seg.color }} />
-                      <span className={styles.legendLabel}>{seg.label}</span>
+                      <span className={styles.legendSwatch} style={{ background: DEVICE_STATUS_COLORS[status] }} />
+                      <span className={styles.legendLabel}>{status}</span>
                     </span>
                     <span className={styles.legendValue}>
-                      {seg.value.toLocaleString()} &middot; {formatPercent(seg.value, fleetTotal)}
+                      {count.toLocaleString()} &middot; {formatPercent(count, fleetTotal)}
                     </span>
                   </li>
-                ))}
-              </ul>
-            </div>
+                );
+              })}
+            </ul>
           </div>
         </div>
       </div>

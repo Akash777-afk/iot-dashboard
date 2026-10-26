@@ -1,4 +1,5 @@
 import { useMemo, useState, type SVGProps } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '../../layout/AppLayout';
 import { icons } from '../../assets/icons';
 import { SortSelect } from '../../components/SortSelect';
@@ -241,6 +242,7 @@ const ANALYTICS_VIEW_TABS: Array<TabBarItem<AnalyticsViewId>> = [
 ];
 
 export function Analytics() {
+  const navigate = useNavigate();
   const [analyticsView, setAnalyticsView] = useState<AnalyticsViewId>('dashboard');
   const [drillCircle, setDrillCircle] = useState<CircleId | null>(null);
   const [drillCustomer, setDrillCustomer] = useState<CustomerId | null>(null);
@@ -1157,7 +1159,9 @@ export function Analytics() {
               <p className={styles.aiSubtitle}>Ask an analytical question across KPIs, devices, cells, customers, geography, or time.</p>
             </div>
           </div>
-          <span className={styles.aiBadge}>Enterprise LLM Ready</span>
+          <button type="button" className={styles.aiDashboardButton} onClick={() => navigate('/')}>
+            Go to Dashboard
+          </button>
         </div>
 
         <div className={styles.aiSearchRow}>
