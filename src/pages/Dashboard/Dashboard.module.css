@@ -89,6 +89,11 @@
   color: var(--color-text-primary);
 }
 
+.cardActionButton:focus-visible {
+  outline: 2px solid var(--color-primary-navy);
+  outline-offset: 2px;
+}
+
 .cardActionIcon {
   width: 13.5px;
   height: 13.5px;
@@ -150,7 +155,7 @@
   color: var(--color-text-secondary);
 }
 
-/* Module 4 — Device Status Distribution */
+/* Module 3 — Device Status Distribution */
 .statusChart {
   margin-bottom: 9px;
 }
@@ -206,7 +211,7 @@
   white-space: nowrap;
 }
 
-/* Module 2 — Device Type Distribution */
+/* Module 4 — Device Type Distribution */
 .barList {
   list-style: none;
   margin: 0;
@@ -225,8 +230,8 @@
 }
 
 .barListLabel {
-  flex: 0 0 132px;
-  font-size: var(--font-size-sm);
+  flex: 0 0 172px;
+  font-size: var(--font-size-base);
   color: var(--color-text-primary);
   font-weight: 600;
   overflow: hidden;
@@ -237,12 +242,13 @@
 .barListTrack {
   flex: 1 1 auto;
   min-width: 0;
-  height: 12px;
+  height: 10px;
   border-radius: var(--radius-pill);
   background: var(--color-divider);
   overflow: hidden;
 }
 
+/* Per-row color comes from the navy -> light-blue ramp in Dashboard.tsx; this is only the fallback. */
 .barListFill {
   height: 100%;
   border-radius: var(--radius-pill);
@@ -260,12 +266,14 @@
   white-space: nowrap;
 }
 
-/* Module 3 — SIM Applet Operations */
+/* Module 2 — SIM Applet Operations — fills and vertically centers in the card so it stays balanced
+   beside the taller Security Posture donut on the same row. */
 .progressGroup {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  gap: 18px;
-  margin-top: 4.5px;
+  justify-content: center;
+  gap: 27px;
 }
 
 .progressRow {
@@ -342,6 +350,16 @@
 @media (max-width: 640px) {
   .kpiGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Long type names ellipsize here; the full name stays in the label's title tooltip. */
+  .barListLabel {
+    flex-basis: 110px;
+  }
+
+  /* Two legend entries per row, so the 4-item status legend wraps as 2x2 instead of 3+1. */
+  .distributionLegendItem {
+    flex-basis: calc(50% - 9px);
   }
 }
 

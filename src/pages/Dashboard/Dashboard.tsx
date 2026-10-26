@@ -37,6 +37,13 @@ const DEVICE_STATUS_COLORS: Record<DeviceStatus, string> = {
   Blacklisted: 'var(--color-chart-blue-light)',
 };
 
+// Same navy -> light-blue ramp as the status colors above, spread evenly over `count` steps so the
+// Device Type bars (sorted largest first) darken with share.
+function rampColor(index: number, count: number): string {
+  const lightShare = count > 1 ? Math.round((index / (count - 1)) * 100) : 0;
+  return `color-mix(in srgb, var(--color-primary-navy), var(--color-chart-blue-light) ${lightShare}%)`;
+}
+
 function formatPercent(value: number, total: number): string {
   if (total <= 0) return '0.0%';
   return `${((value / total) * 100).toFixed(1)}%`;
@@ -216,31 +223,6 @@ export function Dashboard() {
 
           <div className={styles.fleetCard}>
             <h3 className={styles.fleetCardTitle}>
-              <icons.layers className={styles.fleetCardIcon} />
-              Device Type Distribution
-            </h3>
-            <p className={styles.fleetCardSubtitle}>Distribution of {fleetTotal.toLocaleString()} IoT devices by type</p>
-
-            <ul className={styles.barList}>
-              {deviceTypeRows.map((row) => (
-                <li key={row.type} className={styles.barListRow}>
-                  <span className={styles.barListLabel}>{row.type}</span>
-                  <div className={styles.barListTrack}>
-                    <div
-                      className={styles.barListFill}
-                      style={{ width: `${(row.count / fleetTotal) * 100}%` }}
-                    />
-                  </div>
-                  <span className={styles.barListValue}>
-                    {row.count.toLocaleString()} &middot; {formatPercent(row.count, fleetTotal)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className={styles.fleetCard}>
-            <h3 className={styles.fleetCardTitle}>
               <UploadIcon className={styles.fleetCardIcon} />
               SIM Applet Operations
             </h3>
@@ -256,7 +238,7 @@ export function Dashboard() {
                   <div className={styles.progressTrack}>
                     <div
                       className={styles.progressFill}
-                      style={{ width: `${(SIM_APPLET_ROLLOUT_COUNT / fleetTotal) * 100}%`, background: 'var(--color-chart-blue-dark)' }}
+                      style={{ width: `${(SIM_APPLET_ROLLOUT_COUNT / fleetTotal) * 100}%`, background: 'var(--color-primary-navy)' }}
                     />
                   </div>
                   <span className={styles.progressPercent}>{formatPercent(SIM_APPLET_ROLLOUT_COUNT, fleetTotal)}</span>
@@ -316,6 +298,34 @@ export function Dashboard() {
                   </li>
                 );
               })}
+            </ul>
+          </div>
+
+          <div className={styles.fleetCard}>
+            <h3 className={styles.fleetCardTitle}>
+              <icons.layers className={styles.fleetCardIcon} />
+              Device Type Distribution
+            </h3>
+            <p className={styles.fleetCardSubtitle}>Distribution of {fleetTotal.toLocaleString()} IoT devices by type</p>
+
+            <ul className={styles.barList}>
+              {deviceTypeRows.map((row, i) => (
+                <li key={row.type} className={styles.barListRow}>
+                  <span className={styles.barListLabel} title={row.type}>{row.type}</span>
+                  <div className={styles.barListTrack}>
+                    <div
+                      className={styles.barListFill}
+                      style={{
+                        width: `${(row.count / fleetTotal) * 100}%`,
+                        background: rampColor(i, deviceTypeRows.length),
+                      }}
+                    />
+                  </div>
+                  <span className={styles.barListValue}>
+                    {row.count.toLocaleString()} &middot; {formatPercent(row.count, fleetTotal)}
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
